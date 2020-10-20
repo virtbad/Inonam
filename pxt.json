@@ -5,9 +5,8 @@
         "ev3": "*"
     },
     "files": [
-        "main.blocks",
         "main.ts",
         "README.md"
     ],
-    "preferredEditor": "blocksprj"
+    "preferredEditor": "tsprj"
 }
