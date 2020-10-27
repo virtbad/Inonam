@@ -5,6 +5,8 @@
         "ev3": "*"
     },
     "files": [
+        "station/station.ts",
+        "station/conveyors.ts",
         "main.ts",
         "README.md"
     ],
