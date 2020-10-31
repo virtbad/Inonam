@@ -8,6 +8,7 @@ interface configOptions {
   stationCoordinate: Coordinate;
   startCoordinate: Coordinate;
   dimensions: { x: number; y: number };
+  size: { width: number; length: number };
   defaultRoverMotorSpeed: number;
   craneRotationCount: number;
   clawRotationCount: number;
@@ -28,6 +29,7 @@ const config: configOptions = {
   stationCoordinate: new Coordinate(0, 50),
   startCoordinate: new Coordinate(0, 20),
   dimensions: { x: 200, y: 200 },
+  size: { width: 15, length: 22 },
   defaultRoverMotorSpeed: 20,
   craneRotationCount: 40,
   clawRotationCount: 10,

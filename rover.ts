@@ -28,15 +28,18 @@ class Rover {
 
   public drive(
     direction: 'forwards' | 'backwards',
-    unit: MoveUnit,
+    unit: MoveUnit | 'centimeter',
     repetitions: number,
     speed: number = config.defaultRoverMotorSpeed,
   ): boolean {
+    const effUnit: MoveUnit = unit == 'centimeter' ? MoveUnit.Degrees : unit;
+    const effRepetitions: number =
+      unit == 'centimeter' ? repetitions / config.fieldsPerDeg : repetitions;
     motors.largeA.setPauseOnRun(true);
     motors.largeA.run(
       direction == 'forwards' ? speed : -speed,
-      repetitions,
-      unit,
+      effRepetitions,
+      effUnit,
     );
     return true;
   }

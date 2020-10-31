@@ -65,7 +65,7 @@ class GeometryUtils {
     }
 
     public static linesXOfIntersection(l1 : Line, l2 : Line) : number{
-        if (l1.m == l2.m) throw Error("Intersecting lines must not be parallel");
+        if (l1.m == l2.m) return 0
         return ((l2.q - l1.q) / (l1.m - l2.m));
     }
 
