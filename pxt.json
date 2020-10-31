@@ -12,6 +12,9 @@
         "station/station.ts",
         "station/conveyors.ts",
         "main.ts",
+        "rover.ts",
+        "finder.ts",
+        "config.ts",
         "README.md"
     ],
     "preferredEditor": "tsprj"
