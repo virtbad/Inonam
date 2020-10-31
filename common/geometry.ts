@@ -7,7 +7,7 @@ class Line {
         this.q = q;
     }
 
-    public fromAngle(p : Point, a : number){
+    public fromAngle(p : Point, a : number) : void{
         this.m = Math.tan(MathUtils.toRadiants(a));
         this.q = p.y - p.x * this.m;
     }
@@ -43,6 +43,14 @@ class Point {
         this.x = x;
         this.y = y;
     }
+
+    public isInField(): boolean {
+        if (this.x <= config.dimensions.x && this.y <= config.dimensions.y) {
+          if (this.x >= 0 && this.y >= 0) {
+            return true;
+          } else return false;
+        } else return false;
+      }
 }
 
 class Circle {

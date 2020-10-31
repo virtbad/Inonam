@@ -4,14 +4,42 @@ enum RoverEvent {
   GYRO = 3,
 }
 
+enum Units {
+  Rotations = 0,
+  Degrees = 1,
+  Seconds = 2,
+  Milliseconds = 3,
+  Centimeters = 4,
+}
+
+enum DriveDirection {
+  Forwards = 1,
+  Backwards = -1,
+}
+
+enum SteerDirection {
+  Left = -1,
+  Right = 1
+}
+
+enum CraneDirection {
+  Up = -1,
+  Down = 1,
+}
+
+enum ClawPosition {
+  Open = -1,
+  Close = 1,
+}
+
 class Rover {
-  public position: Coordinate;
+  public position: Point;
   public driveDegrees: number;
   public steerDegrees: number;
   public gyroDegrees: number;
   public positions: {
-    claw: 'open' | 'close';
-    crane: 'up' | 'down';
+    claw: ClawPosition;
+    crane: CraneDirection;
     steer: number;
   };
   constructor() {
@@ -20,24 +48,24 @@ class Rover {
     this.steerDegrees = motors.mediumD.angle();
     this.gyroDegrees = sensors.gyro4.angle();
     this.positions = {
-      claw: 'open',
-      crane: 'down',
+      claw: ClawPosition.Open,
+      crane: CraneDirection.Down,
       steer: 0,
     };
   }
 
   public drive(
-    direction: 'forwards' | 'backwards',
-    unit: MoveUnit | 'centimeter',
+    direction: DriveDirection,
+    unit: Units,
     repetitions: number,
     speed: number = config.defaultRoverMotorSpeed,
   ): boolean {
-    const effUnit: MoveUnit = unit == 'centimeter' ? MoveUnit.Degrees : unit;
+    const effUnit: number = unit == 4 ? 3 : unit;
     const effRepetitions: number =
-      unit == 'centimeter' ? repetitions / config.fieldsPerDeg : repetitions;
+      unit == 4 ? repetitions / config.fieldsPerDeg : repetitions;
     motors.largeA.setPauseOnRun(true);
     motors.largeA.run(
-      direction == 'forwards' ? speed : -speed,
+      direction * speed,
       effRepetitions,
       effUnit,
     );
@@ -45,7 +73,7 @@ class Rover {
   }
 
   public steer(
-    direction: 'left' | 'right',
+    direction: SteerDirection,
     degrees: number,
     speed: number = config.defaultRoverMotorSpeed,
   ): boolean {
@@ -54,7 +82,7 @@ class Rover {
       degrees * (config.maxSteerMotorDegrees / config.maxEffectiveDegrees);
     const max: number = config.maxSteerMotorDegrees;
     let run: { speed: number; degrees: number };
-    if (direction == 'right') {
+    if (direction == SteerDirection.Right) {
       if (current - deg < -max) {
         run = {
           speed: -speed,
@@ -96,7 +124,7 @@ class Rover {
    */
 
   public moveCrane(
-    direction: 'up' | 'down',
+    direction: CraneDirection,
     speed: number = config.defaultRoverMotorSpeed,
   ): boolean {
     if (this.positions.crane == direction) {
@@ -104,7 +132,7 @@ class Rover {
     } else {
       motors.largeC.setPauseOnRun(true);
       motors.largeC.run(
-        direction == 'up' ? -speed : speed,
+        direction * speed,
         config.craneRotationCount,
         MoveUnit.Rotations,
       );
@@ -120,7 +148,7 @@ class Rover {
    */
 
   public useClaw(
-    operation: 'close' | 'open',
+    operation: ClawPosition,
     speed: number = config.defaultRoverMotorSpeed,
   ): boolean {
     if (this.positions.claw == operation) {
@@ -128,7 +156,7 @@ class Rover {
     } else {
       motors.mediumB.setPauseOnRun(true);
       motors.mediumB.run(
-        operation == 'open' ? -speed : speed,
+        operation * speed,
         config.clawRotationCount,
         MoveUnit.Rotations,
       );
@@ -141,7 +169,7 @@ class Rover {
     handler: (
       event: RoverEvent,
       distance: number,
-      coordinate?: Coordinate,
+      coordinate?: Point,
     ) => void,
   ): void {
     forever(() => {

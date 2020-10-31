@@ -1,40 +1,40 @@
-console.sendToScreen();
 const rover: Rover = new Rover();
 const finder: Finder = new Finder(rover);
-const queue: Queue = new Queue(rover);
 const pathfinding: Maneuvers = new Maneuvers(
   config.size.width,
   config.size.length,
   config.maxEffectiveDegrees,
 );
+const queue: Queue = new Queue(rover, pathfinding);
 let objects: Array<Instruction[]> = [];
 
 let test: number = 1;
 
 brick.buttonDown.onEvent(ButtonEvent.Pressed, () => {
   brick.setStatusLight(StatusLight.GreenPulse);
-  if (rover.drive('forwards', MoveUnit.Rotations, 2, 10)) {
+  if (rover.drive(DriveDirection.Forwards, Units.Rotations, 2, 10)) {
     console.log('arrived');
   }
 });
 
 brick.buttonUp.onEvent(ButtonEvent.Pressed, () => {
-  rover.steer('right', 27, 20);
+  rover.steer(SteerDirection.Left, 27, 20);
 });
 
-finder.onFind((coordinate: Coordinate) => {
+finder.onFind((coordinate: Point) => {
   if (test == 2) return;
-  queue.addInstructions(pathfinding.findToObject(coordinate));
+  queue.addInstructions(pathfinding.findToObject(new Point(100, 40)));
+  //queue.addInstructions(pathfinding.findToObject(new Point(coordinate.x, coordinate.y)));
   test = 2;
 });
 
 rover.onEvent(
-  (event: RoverEvent, distance: number, coordinate?: Coordinate) => {
+  (event: RoverEvent, distance: number, coordinate?: Point) => {
     switch (event) {
       case RoverEvent.DRIVE:
         if (!coordinate.isInField()) rover.stopAll();
         pathfinding.update(
-          { x: coordinate.x, y: coordinate.y },
+          coordinate,
           rover.gyroDegrees,
         );
         break;
