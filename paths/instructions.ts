@@ -1,4 +1,6 @@
-class Instruction {}
+class Instruction {
+    constructor() {}
+}
 
 class DriveInstruction extends Instruction {
     private length : number;
