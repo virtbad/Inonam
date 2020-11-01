@@ -20,15 +20,21 @@ class Queue {
     brick.setStatusLight(StatusLight.Red);
   }
 
-  public toNewPoint(): void {
+  public toNewPoint(): boolean {
     if(this._queue.length != 0) {
-      const shift: Instruction[] = pathfinding.findToObject( this._queue.shift())
-      shift.forEach((instruction: Instruction) => this._currentInstructions.push(instruction));
-    }
+      if(this._currentInstructions.length != 0) {
+        const shift: Instruction[] = pathfinding.findToObject( this._queue.shift())
+        shift.forEach((instruction: Instruction) => this._currentInstructions.push(instruction));
+        return true;
+      } else return false;
+    } else return false;
+  }
+
+  public toStation(): void {
+
   }
 
   public shift() {
-    console.log("ASDF");
     if (this._currentInstructions.length != 0) {
       const shift: Instruction = this._currentInstructions.shift();
       if (shift instanceof DriveInstruction) {
@@ -41,16 +47,9 @@ class Queue {
         if (this.solveSteerinstruction(shift)) {
           return true;
         }
-      } else {
-        brick.setStatusLight(StatusLight.GreenPulse);
-      }
-    } else {
-      if (this._queue.length != 0) {
-      } else {
-          return true;
-      }
+      } 
     }
-    return true;
+    return false;
   }
 
   private solveDriveinstruction(instruction: DriveInstruction): boolean {

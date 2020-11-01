@@ -173,7 +173,6 @@ class Rover {
     ) => void,
   ): void {
     forever(() => {
-      setInterval(() => {
         const currentDriveAngle: number = motors.largeA.angle();
         const currentSteerAngle: number = motors.mediumD.angle();
         const currentGyroAngle: number = sensors.gyro4.angle();
@@ -195,7 +194,6 @@ class Rover {
           handler(3, currentGyroAngle - this.gyroDegrees);
           this.gyroDegrees = currentGyroAngle;
         }
-      }, config.driveInterval);
     });
   }
 }
