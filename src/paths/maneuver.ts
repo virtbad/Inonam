@@ -4,10 +4,12 @@ class Maneuvers {
 
   private minR: number; // Minimal Radius
 
-  private p: Point = new Point(config.startCoordinate.x, config.startCoordinate.y); // Position
-  private a: number = 0; // Angle
+  private p: Point; // Position
+  private a: number; // Angle
 
   constructor(width: number, length: number, maximalSteer: number) {
+    this.p = new Point(config.startCoordinate.x, config.startCoordinate.y);
+    this.a = 0;
     this.width = width;
     this.length = length;
     this.minR = this.minimalRadius(maximalSteer);
@@ -48,7 +50,7 @@ class Maneuvers {
     let downMX: number = GeometryUtils.linesXOfIntersection(GeometryUtils.linePerpendicularThrough(g, new Point(mx, my)), g);
     let distance : number = GeometryUtils.lineDistanceOnBetween(g, this.p.x, downMX);
 
-    instructions.push(new DriveInstruction(distance));
+    instructions.push(new Instruction(distance));
 
     let k: number = GeometryUtils.pointDistanceBetween(t, new Point(downMX, g.getY(downMX)));
     let phi: number = 2 * MathUtils.toDegrees(Math.asin(k / 2 / circle.r));
@@ -56,7 +58,7 @@ class Maneuvers {
     let circleDistance : number = (circle.getExtent() / 360) * phi;
     let angle : number = this.steerAngleFromRadius(circle.r);
 
-    instructions.push(new SteerInstruction(circleDistance, angle));
+    instructions.push(new Instruction(circleDistance, angle));
 
     return instructions;
   }

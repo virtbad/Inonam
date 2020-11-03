@@ -1,12 +1,14 @@
 class Queue {
-  private _queue: Array<Point> = [];
-  private _currentInstructions: Array<Instruction> = [];
+  private _queue: Array<Point>;
+  private _currentInstructions: Array<Instruction>;
   private _rover: Rover;
   private _pathfinding: Maneuvers
   constructor(rover: Rover, pathfinding: Maneuvers) {
+    this._queue = [];
+    this._currentInstructions = [];
     this._rover = rover;
     this._pathfinding = pathfinding
-    forever(() => this.shift());
+    //control.runInParallel(() => this.shift());
   }
 
   public add(point: Point) {
@@ -14,20 +16,10 @@ class Queue {
   }
 
   public addInstructions(instructions: Instruction[]) {
-    if(instructions.length == 1) {
-      music.playSoundEffect(sounds.colorsRed)
-
-    } else {
-      music.playSoundEffect(sounds.colorsGreen)
-
-    }
     instructions.forEach((instruction: Instruction) => {
       this._currentInstructions.push(instruction);
-      if(instruction instanceof DriveInstruction) {
-      } 
-      if(instruction instanceof SteerInstruction) {
-      }
     });
+    console.log("added instructions")
   }
 
   public toNewPoint(): boolean {
@@ -44,38 +36,42 @@ class Queue {
 
   }
 
-  public shift() {
+  public shift(): Function {
     if (this._currentInstructions.length != 0) {
+      console.log("object");
       const shift: Instruction = this._currentInstructions.shift();
-      if (shift instanceof DriveInstruction) {
-        if (this.solveDriveinstruction(shift)) {
-          this.shift();
-          return true;
-        }
-      } 
-      if (shift instanceof SteerInstruction) {
-        if (this.solveSteerinstruction(shift)) {
-          return true;
-        }
-      } 
+      if (!shift.angle || shift.angle == 0) {
+         this.solveDriveinstruction(shift) 
+      } else {
+        this.solveSteerinstruction(shift);
+      }
     }
-    return false;
+    pause(2000);
+    return this.shift();
   }
 
-  private solveDriveinstruction(instruction: DriveInstruction): boolean {
-    const length: number = instruction.getLength();
-    if (this._rover.drive(1, 4, length, 20)) {
-      return true;
-    }
-    return true;
+  private solveDriveinstruction(instruction: Instruction) {
+    console.log("drive: " + instruction.length)
+    this._rover.drive(1, 4, instruction.length, 20);
+    console.log("drivefinished");
   }
 
-  private solveSteerinstruction(instruction: SteerInstruction): boolean {
+  private solveSteerinstruction(instruction: Instruction): boolean {
+    console.log("steer")
     brick.setStatusLight(StatusLight.Orange)
-    const length: number = instruction.getLength();
-    const angle: number = Math.abs(instruction.getAngle());
+    const length: number = instruction.length;
+    const angle: number = Math.abs(instruction.angle);
     const direction: SteerDirection = angle < 0 ? -1 : 1;
-    if (this._rover.steer(direction, angle, 20)) {
+    this._rover.steer(direction, angle, 20) 
+    this._rover.drive(1, 4, length, 20) 
+    this._rover.steer(direction * -1, angle, 20) 
+    pause(100)
+    return true
+    }
+  }
+
+
+    /*    if (this._rover.steer(direction, angle, 20)) {
       if (this._rover.drive(1, 4, length, 20)) {
         if (
           this._rover.steer(
@@ -84,10 +80,12 @@ class Queue {
             20,
           )
         ) {
+          pause(100)
           return true;
         }
       }
-    }
-    return true;
-  }
+    } */
+   //reeturn true;
+  /* }
 }
+ */

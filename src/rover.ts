@@ -54,32 +54,24 @@ class Rover {
     };
   }
 
-  public drive(
-    direction: DriveDirection,
-    unit: Units,
-    repetitions: number,
-    speed: number = config.defaultRoverMotorSpeed,
-  ): boolean {
+  public drive(direction: DriveDirection,unit: Units,repetitions: number,speed: number) : boolean{
     const effUnit: number = unit == 4 ? 3 : unit;
-    const effRepetitions: number =
-      unit == 4 ? repetitions / config.fieldsPerDeg : repetitions;
-    motors.largeA.setPauseOnRun(true);
+    const effRepetitions: number = unit == 4 ? repetitions / config.fieldsPerDeg : repetitions;
+    motors.largeA.pauseUntilReady();
+    console.log("started")
     motors.largeA.run(
       direction * speed,
       effRepetitions,
       effUnit,
     );
+    console.log("ready")
     return true;
   }
 
-  public steer(
-    direction: SteerDirection,
-    degrees: number,
-    speed: number = config.defaultRoverMotorSpeed,
-  ): boolean {
+
+  public steer(direction: SteerDirection,degrees: number,speed: number): boolean {
     const current: number = motors.mediumD.angle();
-    const deg: number =
-      degrees * (config.maxSteerMotorDegrees / config.maxEffectiveDegrees);
+    const deg: number = degrees * (config.maxSteerMotorDegrees / config.maxEffectiveDegrees);
     const max: number = config.maxSteerMotorDegrees;
     let run: { speed: number; degrees: number };
     if (direction == SteerDirection.Right) {
@@ -107,7 +99,7 @@ class Rover {
         };
       }
     }
-    motors.mediumD.setPauseOnRun(true);
+    motors.mediumD.pauseUntilReady()
     motors.mediumD.run(run.speed, run.degrees, MoveUnit.Degrees);
     this.positions.steer = motors.mediumD.angle();
     return true;
