@@ -14,10 +14,20 @@ class Queue {
   }
 
   public addInstructions(instructions: Instruction[]) {
+    if(instructions.length == 1) {
+      music.playSoundEffect(sounds.colorsRed)
+
+    } else {
+      music.playSoundEffect(sounds.colorsGreen)
+
+    }
     instructions.forEach((instruction: Instruction) => {
       this._currentInstructions.push(instruction);
+      if(instruction instanceof DriveInstruction) {
+      } 
+      if(instruction instanceof SteerInstruction) {
+      }
     });
-    brick.setStatusLight(StatusLight.Red);
   }
 
   public toNewPoint(): boolean {
@@ -38,12 +48,12 @@ class Queue {
     if (this._currentInstructions.length != 0) {
       const shift: Instruction = this._currentInstructions.shift();
       if (shift instanceof DriveInstruction) {
-        brick.setStatusLight(StatusLight.RedPulse);
         if (this.solveDriveinstruction(shift)) {
           this.shift();
           return true;
         }
-      } else if (shift instanceof SteerInstruction) {
+      } 
+      if (shift instanceof SteerInstruction) {
         if (this.solveSteerinstruction(shift)) {
           return true;
         }
@@ -61,15 +71,16 @@ class Queue {
   }
 
   private solveSteerinstruction(instruction: SteerInstruction): boolean {
+    brick.setStatusLight(StatusLight.Orange)
     const length: number = instruction.getLength();
-    const angle: number = instruction.getAngle();
+    const angle: number = Math.abs(instruction.getAngle());
     const direction: SteerDirection = angle < 0 ? -1 : 1;
-    if (this._rover.steer(direction, Math.abs(angle), 20)) {
+    if (this._rover.steer(direction, angle, 20)) {
       if (this._rover.drive(1, 4, length, 20)) {
         if (
           this._rover.steer(
             direction * -1,
-            Math.abs(angle),
+            angle,
             20,
           )
         ) {
