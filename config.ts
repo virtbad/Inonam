@@ -37,5 +37,5 @@ const config: configOptions = {
   maxEffectiveDegrees: 27,
   fieldsPerDeg: 0.034,
   offPerDeg: 0.0048,
-  driveInterval: 300,
+  driveInterval: 300
 };

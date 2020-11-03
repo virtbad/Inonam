@@ -1,10 +1,6 @@
 const rover: Rover = new Rover();
 const finder: Finder = new Finder(rover);
-const pathfinding: Maneuvers = new Maneuvers(
-  config.size.width,
-  config.size.length,
-  config.maxEffectiveDegrees,
-);
+const pathfinding: Maneuvers = new Maneuvers(config.size.width, config.size.length, config.maxEffectiveDegrees);
 const queue: Queue = new Queue(rover, pathfinding);
 let objects: Array<Instruction[]> = [];
 
@@ -28,23 +24,18 @@ finder.onFind((coordinate: Point) => {
   test = 2;
 });
 
-rover.onEvent(
-  (event: RoverEvent, distance: number, coordinate?: Point) => {
-    switch (event) {
-      case RoverEvent.DRIVE:
-        if (!coordinate.isInField()) rover.stopAll();
-        pathfinding.update(
-          coordinate,
-          rover.gyroDegrees,
-        );
-        break;
-      case RoverEvent.GYRO:
-        break;
-      case RoverEvent.STEER:
-        break;
-    }
-  },
-);
+rover.onEvent((event: RoverEvent, distance: number, coordinate?: Point) => {
+  switch (event) {
+    case RoverEvent.DRIVE:
+      if (!coordinate.isInField()) rover.stopAll();
+      pathfinding.update(coordinate, rover.gyroDegrees);
+      break;
+    case RoverEvent.GYRO:
+      break;
+    case RoverEvent.STEER:
+      break;
+  }
+});
 
 function newPoint(point: Point) {
   queue.add(point);

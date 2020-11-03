@@ -2,10 +2,10 @@ class Queue {
   private _queue: Array<Point> = [];
   private _currentInstructions: Array<Instruction> = [];
   private _rover: Rover;
-  private _pathfinding: Maneuvers
+  private _pathfinding: Maneuvers;
   constructor(rover: Rover, pathfinding: Maneuvers) {
     this._rover = rover;
-    this._pathfinding = pathfinding
+    this._pathfinding = pathfinding;
     forever(() => this.shift());
   }
 
@@ -21,18 +21,16 @@ class Queue {
   }
 
   public toNewPoint(): boolean {
-    if(this._queue.length != 0) {
-      if(this._currentInstructions.length != 0) {
-        const shift: Instruction[] = pathfinding.findToObject( this._queue.shift())
+    if (this._queue.length != 0) {
+      if (this._currentInstructions.length != 0) {
+        const shift: Instruction[] = pathfinding.findToObject(this._queue.shift());
         shift.forEach((instruction: Instruction) => this._currentInstructions.push(instruction));
         return true;
       } else return false;
     } else return false;
   }
 
-  public toStation(): void {
-
-  }
+  public toStation(): void {}
 
   public shift() {
     if (this._currentInstructions.length != 0) {
@@ -47,7 +45,7 @@ class Queue {
         if (this.solveSteerinstruction(shift)) {
           return true;
         }
-      } 
+      }
     }
     return false;
   }
@@ -66,13 +64,7 @@ class Queue {
     const direction: SteerDirection = angle < 0 ? -1 : 1;
     if (this._rover.steer(direction, Math.abs(angle), 20)) {
       if (this._rover.drive(1, 4, length, 20)) {
-        if (
-          this._rover.steer(
-            direction * -1,
-            Math.abs(angle),
-            20,
-          )
-        ) {
+        if (this._rover.steer(direction * -1, Math.abs(angle), 20)) {
           return true;
         }
       }

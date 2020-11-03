@@ -25,15 +25,15 @@ class Maneuvers {
 
     let f: number = GeometryUtils.lineDistanceOnBetween(c, GeometryUtils.linesXOfIntersection(g, c), t.x);
 
-    let r : number = this.minR;
+    let r: number = this.minR;
 
     if (f > 2 * r) r = f / 2;
 
     let e: number = f - r;
 
-    let h : number = Math.sqrt(r ** 2 - e ** 2);
+    let h: number = Math.sqrt(r ** 2 - e ** 2);
 
-    let dhx : number = GeometryUtils.lineXOfDistanceAfter(c, GeometryUtils.linesXOfIntersection(c, g), r * (over ? -1 : 1));
+    let dhx: number = GeometryUtils.lineXOfDistanceAfter(c, GeometryUtils.linesXOfIntersection(c, g), r * (over ? -1 : 1));
     let d: Line = GeometryUtils.linePerpendicularThrough(c, new Point(dhx, c.getY(dhx)));
 
     let mx: number = GeometryUtils.lineXOfDistanceAfter(d, GeometryUtils.linesXOfIntersection(c, d), h * (after ? -1 : 1));
@@ -46,15 +46,15 @@ class Maneuvers {
     let circle: Circle = new Circle(new Point(mx, my), r);
 
     let downMX: number = GeometryUtils.linesXOfIntersection(GeometryUtils.linePerpendicularThrough(g, new Point(mx, my)), g);
-    let distance : number = GeometryUtils.lineDistanceOnBetween(g, this.p.x, downMX);
+    let distance: number = GeometryUtils.lineDistanceOnBetween(g, this.p.x, downMX);
 
     instructions.push(new DriveInstruction(distance));
 
     let k: number = GeometryUtils.pointDistanceBetween(t, new Point(downMX, g.getY(downMX)));
     let phi: number = 2 * MathUtils.toDegrees(Math.asin(k / 2 / circle.r));
 
-    let circleDistance : number = (circle.getExtent() / 360) * phi;
-    let angle : number = this.steerAngleFromRadius(circle.r);
+    let circleDistance: number = (circle.getExtent() / 360) * phi;
+    let angle: number = this.steerAngleFromRadius(circle.r);
 
     instructions.push(new SteerInstruction(circleDistance, angle));
 
