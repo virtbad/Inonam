@@ -6,21 +6,13 @@ class Finder {
 
   public onFind(handler: (coordinate: Point) => void): void {
     sensors.ultrasonic3.onEvent(UltrasonicSensorEvent.ObjectDetected, () => {
-      const coordinate: Point = getCoordinateFromDistance(
-        sensors.ultrasonic3.distance(),
-        this._rover.gyroDegrees,
-        this._rover.position,
-      );
+      const coordinate: Point = getCoordinateFromDistance(sensors.ultrasonic3.distance(), this._rover.gyroDegrees, this._rover.position);
       if (coordinate.isInField()) handler(coordinate);
     });
   }
 }
 
-function getCoordinateFromDistance(
-  distance: number,
-  angle: number,
-  pos: Point,
-): Point {
+function getCoordinateFromDistance(distance: number, angle: number, pos: Point): Point {
   const rots: number = angle % 360;
   const degrees: number = rots % 90;
   const quadrant: number = Math.floor(rots / 90) + (rots < 0 ? 5 : 1);
@@ -53,5 +45,3 @@ function getCoordinateFromDistance(
   }
   return new Point(0, 0);
 }
-
-
