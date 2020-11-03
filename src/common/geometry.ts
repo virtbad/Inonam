@@ -1,3 +1,22 @@
+// Priority: 1
+class Point {
+    public x : number;
+    public y : number;
+
+    constructor(x : number, y : number){
+        this.x = x;
+        this.y = y;
+    }
+
+    public isInField(): boolean {
+        if (this.x <= config.dimensions.x && this.y <= config.dimensions.y) {
+          if (this.x >= 0 && this.y >= 0) {
+            return true;
+          } else return false;
+        } else return false;
+      }
+}
+
 class Line {
     public m : number;
     public q : number;
@@ -33,24 +52,6 @@ class Line {
     public getY(x : number) : number{
         return (this.m * x + this.q);
     }
-}
-
-class Point {
-    public x : number;
-    public y : number;
-
-    constructor(x : number, y : number){
-        this.x = x;
-        this.y = y;
-    }
-
-    public isInField(): boolean {
-        if (this.x <= config.dimensions.x && this.y <= config.dimensions.y) {
-          if (this.x >= 0 && this.y >= 0) {
-            return true;
-          } else return false;
-        } else return false;
-      }
 }
 
 class Circle {
