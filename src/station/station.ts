@@ -1,13 +1,12 @@
 class Station {
+  private collectorBelt: ConveyorBelt;
+  private upwardsBelt: ConveyorBelt;
 
-    private collectorBelt: ConveyorBelt;
-    private upwardsBelt: ConveyorBelt;
+  constructor() {
+    this.collectorBelt = new ConveyorBelt(false, 40, 10, 'largeA');
+  }
 
-    constructor() {
-        this.collectorBelt = new ConveyorBelt(false, 40, 10, "largeA");
-    }
-
-    public test() : void{
-        this.collectorBelt.run(100);
-    }
+  public test(): void {
+    this.collectorBelt.run(100);
+  }
 }

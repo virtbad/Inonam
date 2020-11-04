@@ -2,7 +2,7 @@ class Queue {
   private _queue: Array<Point>;
   private _currentInstructions: Array<Instruction>;
   private _rover: Rover;
-  private _pathfinding: Maneuvers
+  private _pathfinding: Maneuvers;
   constructor(rover: Rover, pathfinding: Maneuvers) {
     this._queue = [];
     this._currentInstructions = [];
@@ -22,18 +22,16 @@ class Queue {
   }
 
   public toNewPoint(): boolean {
-    if(this._queue.length != 0) {
-      if(this._currentInstructions.length != 0) {
-        const shift: Instruction[] = pathfinding.findToObject( this._queue.shift())
+    if (this._queue.length != 0) {
+      if (this._currentInstructions.length != 0) {
+        const shift: Instruction[] = pathfinding.findToObject(this._queue.shift());
         shift.forEach((instruction: Instruction) => this._currentInstructions.push(instruction));
         return true;
       } else return false;
     } else return false;
   }
 
-  public toStation(): void {
-
-  }
+  public toStation(): void {}
 
   public shift(): Function {
     if (this._currentInstructions.length != 0) {
@@ -66,5 +64,6 @@ class Queue {
     this._rover.drive(Units.Centimeters, instruction.length, 20);
     this._rover.steer(-instruction.angle, 20);
     console.log("Finished Steering");
+
   }
 }

@@ -1,3 +1,1 @@
-function run(){
-
-}
+function run() {}
