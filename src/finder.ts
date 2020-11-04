@@ -54,4 +54,11 @@ function getCoordinateFromDistance(
   return new Point(0, 0);
 }
 
+function getCoordinateFromDistance2(distance: number, angle: number, pos: Point): Point {
+  const l1: number = Math.cos(MathUtils.toRadiants(angle)) * distance;
+  const l2: number = Math.sin(MathUtils.toRadiants(angle)) * distance;
+  
+  return new Point(pos.x + l1, pos.y + l2);
+}
+
 

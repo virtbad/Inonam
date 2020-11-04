@@ -54,55 +54,22 @@ class Rover {
     };
   }
 
-  public drive(direction: DriveDirection,unit: Units,repetitions: number,speed: number) : boolean{
-    const effUnit: number = unit == 4 ? 3 : unit;
-    const effRepetitions: number = unit == 4 ? repetitions / config.fieldsPerDeg : repetitions;
-    motors.largeA.pauseUntilReady();
-    console.log("started")
-    motors.largeA.run(
-      direction * speed,
-      effRepetitions,
-      effUnit,
-    );
-    console.log("ready")
-    return true;
+  public drive(unit: Units, value: number, speed: number){
+    const effRepetitions: number = unit == 4 ? value / config.fieldsPerDeg : value;
+    const effUnit: number = unit == 4 ? MoveUnit.Degrees : unit;
+
+    console.log("" + effRepetitions);
+    motors.largeA.run(speed, effRepetitions, effUnit);
   }
 
 
-  public steer(direction: SteerDirection,degrees: number,speed: number): boolean {
-    const current: number = motors.mediumD.angle();
-    const deg: number = degrees * (config.maxSteerMotorDegrees / config.maxEffectiveDegrees);
-    const max: number = config.maxSteerMotorDegrees;
-    let run: { speed: number; degrees: number };
-    if (direction == SteerDirection.Right) {
-      if (current - deg < -max) {
-        run = {
-          speed: -speed,
-          degrees: max + current,
-        };
-      } else {
-        run = {
-          speed: -speed,
-          degrees: deg,
-        };
-      }
-    } else {
-      if (current + deg > max) {
-        run = {
-          speed: speed,
-          degrees: max - current,
-        };
-      } else {
-        run = {
-          speed: speed,
-          degrees: deg,
-        };
-      }
-    }
-    motors.mediumD.pauseUntilReady()
-    motors.mediumD.run(run.speed, run.degrees, MoveUnit.Degrees);
-    this.positions.steer = motors.mediumD.angle();
-    return true;
+  public steer(degrees: number, speed: number) {
+    if (degrees > config.maxEffectiveDegrees) degrees = config.maxEffectiveDegrees;
+
+    const steerPerDegree : number = (config.maxSteerMotorDegrees / config.maxEffectiveDegrees);
+    const real: number = degrees * steerPerDegree - motors.mediumD.angle();
+
+    motors.mediumD.run(speed, real, MoveUnit.Degrees);
   }
 
   public stopAll(): void {
