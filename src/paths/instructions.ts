@@ -1,4 +1,5 @@
 class Instruction {
+
   public length: number;
   public angle: number;
   constructor(length: number, angle?: number) {

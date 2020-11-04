@@ -1,8 +1,13 @@
 // Priority: -1
 console.sendToScreen();
+
 const rover: Rover = new Rover();
 const finder: Finder = new Finder(rover);
+
 const pathfinding: Maneuvers = new Maneuvers(config.size.width, config.size.length, config.maxEffectiveDegrees);
+
+pathfinding.update(new Point(10, 10), 30);
+
 const queue: Queue = new Queue(rover, pathfinding);
 let objects: Array<Instruction[]> = [];
 
@@ -10,9 +15,8 @@ let test: number = 1;
 
 finder.onFind((coordinate: Point) => {
   if (test == 2) return;
-  console.log('found');
-  brick.setStatusLight(StatusLight.Red);
-  queue.addInstructions(pathfinding.findToObject(new Point(100, 40)));
+  console.log("Spotted Object");
+  queue.addInstructions(pathfinding.findToObject(new Point(100, 100)));
   //queue.addInstructions(pathfinding.findToObject(new Point(coordinate.x, coordinate.y)));
   test = 2;
 });

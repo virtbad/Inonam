@@ -7,8 +7,7 @@ class Queue {
     this._queue = [];
     this._currentInstructions = [];
     this._rover = rover;
-    this._pathfinding = pathfinding;
-    //control.runInParallel(() => this.shift());
+    this._pathfinding = pathfinding
   }
 
   public add(point: Point) {
@@ -16,10 +15,10 @@ class Queue {
   }
 
   public addInstructions(instructions: Instruction[]) {
+    console.log("New Instructions");
     instructions.forEach((instruction: Instruction) => {
       this._currentInstructions.push(instruction);
     });
-    console.log('added instructions');
   }
 
   public toNewPoint(): boolean {
@@ -36,34 +35,35 @@ class Queue {
 
   public shift(): Function {
     if (this._currentInstructions.length != 0) {
-      console.log('object');
       const shift: Instruction = this._currentInstructions.shift();
-      if (!shift.angle || shift.angle == 0) {
-        this.solveDriveinstruction(shift);
-      } else {
-        this.solveSteerinstruction(shift);
-      }
+
+      if (!shift.angle || shift.angle == 0) this.solveDriveInstruction(shift) 
+      else this.solveSteerInstruction(shift);
     }
-    pause(2000);
+
+    pause(1000);
+
     return this.shift();
   }
 
-  private solveDriveinstruction(instruction: Instruction) {
-    console.log('drive: ' + instruction.length);
-    this._rover.drive(1, 4, instruction.length, 20);
-    console.log('drivefinished');
+  public solveDriveInstruction(instruction: Instruction) {
+    console.log("Solving Drive Instruction");
+    console.log("Amount to go: " + instruction.length);
+    this._rover.drive(Units.Centimeters, instruction.length, 20);
+    console.log("Finished Driving");
   }
 
-  private solveSteerinstruction(instruction: Instruction): boolean {
-    console.log('steer');
-    brick.setStatusLight(StatusLight.Orange);
-    const length: number = instruction.length;
-    const angle: number = Math.abs(instruction.angle);
-    const direction: SteerDirection = angle < 0 ? -1 : 1;
-    this._rover.steer(direction, angle, 20);
-    this._rover.drive(1, 4, length, 20);
-    this._rover.steer(direction * -1, angle, 20);
-    pause(100);
-    return true;
+  private solveSteerInstruction(instruction: Instruction) {
+    console.log("Solving Steer Instruction");
+
+    console.log("Amount to go: " + instruction.length);
+    console.log("Amount to steer: " + instruction.angle);
+
+    this._rover.steer(instruction.angle, 20);
+    console.log("Driving in Steer Instruction");
+    this._rover.drive(Units.Centimeters, instruction.length, 20);
+    this._rover.steer(-instruction.angle, 20);
+    console.log("Finished Steering");
+
   }
 }
