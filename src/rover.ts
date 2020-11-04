@@ -132,7 +132,7 @@ class Rover {
       if (currentDriveAngle != this.driveDegrees) {
         const difference: number = currentDriveAngle - this.driveDegrees;
         this.driveDegrees = currentDriveAngle;
-        this.position = getCoordinateFromDistance(difference * config.fieldsPerDeg, this.gyroDegrees, this.position);
+        this.position = this.position.getCoordinateFromDistance(difference * config.fieldsPerDeg, this.gyroDegrees);
         handler(2, difference, this.position);
       }
       if (currentGyroAngle != this.gyroDegrees) {
