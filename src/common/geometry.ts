@@ -8,6 +8,12 @@ class Point {
     this.y = y;
   }
 
+  public getCoordinateFromDistance(distance: number, angle: number): Point {
+    const sinL: number = Math.sin(MathUtils.toRadiants(angle)) * distance;
+    const cosL: number = Math.cos(MathUtils.toRadiants(angle)) * distance;
+    return new Point(this.x + cosL, this.y + sinL);
+  }
+
   public isInField(): boolean {
     if (this.x <= config.dimensions.x && this.y <= config.dimensions.y) {
       if (this.x >= 0 && this.y >= 0) {
