@@ -9,7 +9,6 @@ interface configOptions {
   startCoordinate: Point;
   dimensions: { x: number; y: number };
   size: { width: number; length: number };
-  defaultRoverMotorSpeed: number;
   craneRotationCount: number;
   clawRotationCount: number;
   maxSteerMotorDegrees: number;
@@ -17,6 +16,7 @@ interface configOptions {
   offPerDeg: number;
   fieldsPerDeg: number;
   driveInterval: number;
+  minPointDistance: number;
 }
 
 const config: configOptions = {
@@ -29,13 +29,13 @@ const config: configOptions = {
   stationCoordinate: new Point(0, 50),
   startCoordinate: new Point(0, 20),
   dimensions: { x: 200, y: 200 },
-  size: { width: 15, length: 22 },
-  defaultRoverMotorSpeed: 20,
+  size: { width: 15.5, length: 22 },
   craneRotationCount: 40,
   clawRotationCount: 10,
   maxSteerMotorDegrees: 95,
   maxEffectiveDegrees: 27,
   fieldsPerDeg: 0.034,
   offPerDeg: 0.0048,
-  driveInterval: 300
+  driveInterval: 300,
+  minPointDistance: 5
 };
