@@ -15,7 +15,7 @@ let test: number = 1;
 
 finder.onFind((coordinate: Point) => {
   if (test == 2) return;
-  console.log("Spotted Object");
+  console.log(`Spotted Object [${coordinate.x}, ${coordinate.y}]`);
   queue.addInstructions(pathfinding.findToObject(new Point(100, 100)));
   //queue.addInstructions(pathfinding.findToObject(new Point(coordinate.x, coordinate.y)));
   test = 2;
@@ -37,7 +37,6 @@ rover.onEvent((event: RoverEvent, distance: number, coordinate?: Point) => {
 function newPoint(point: Point) {
   queue.add(point);
 }
-//motors.largeA.run(20, 3600 , MoveUnit.Degrees); 
 
 control.runInParallel(() => queue.shift());
 
