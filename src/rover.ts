@@ -65,6 +65,7 @@ class Rover {
 
   public steer(degrees: number, speed: number) {
     if (degrees > config.maxEffectiveDegrees) degrees = config.maxEffectiveDegrees;
+    if (degrees < -config.maxEffectiveDegrees) degrees = -config.maxEffectiveDegrees;
 
     const steerPerDegree : number = (config.maxSteerMotorDegrees / config.maxEffectiveDegrees);
     const real: number = degrees * steerPerDegree - motors.mediumD.angle();

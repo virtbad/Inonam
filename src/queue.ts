@@ -36,13 +36,32 @@ class Queue {
   public shift(): Function {
     if (this._currentInstructions.length != 0) {
       const shift: Instruction = this._currentInstructions.shift();
-
-      if (!shift.angle || shift.angle == 0) this.solveDriveInstruction(shift) 
-      else this.solveSteerInstruction(shift);
+      if (!shift.angle || shift.angle == 0) {
+        //this.solveDriveInstruction(shift)
+        console.log("drive started")
+        motors.largeA.pauseUntilReady()
+        // shift.length / config.fieldsPerDeg
+        motors.largeA.run(20, shift.length / config.fieldsPerDeg, MoveUnit.Degrees); 
+        console.log("drive ended")
+      } else {
+        //this.solveSteerInstruction(shift);
+        console.log("steer started")
+        let degrees: number = shift.angle;
+        const steerPerDegree : number = config.maxSteerMotorDegrees / config.maxEffectiveDegrees;
+        console.log("per d " + steerPerDegree);
+        if (degrees > config.maxEffectiveDegrees) degrees = config.maxEffectiveDegrees;
+        if(degrees < -config.maxEffectiveDegrees) degrees = -config.maxEffectiveDegrees;
+        const real: number = degrees * steerPerDegree - motors.mediumD.angle()
+        motors.mediumD.pauseUntilReady();
+        motors.mediumD.run(20, real, MoveUnit.Degrees);
+        motors.largeA.run(20, shift.length / config.fieldsPerDeg, MoveUnit.Degrees)
+        motors.mediumD.run(-20, real, MoveUnit.Degrees);
+        console.log("steer ended")
+      }
     }
 
     pause(1000);
-
+    
     return this.shift();
   }
 

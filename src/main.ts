@@ -37,8 +37,9 @@ rover.onEvent((event: RoverEvent, distance: number, coordinate?: Point) => {
 function newPoint(point: Point) {
   queue.add(point);
 }
+//motors.largeA.run(20, 3600 , MoveUnit.Degrees); 
 
-queue.shift();
+control.runInParallel(() => queue.shift());
 
 /*
  * 67cm, 5 rot
