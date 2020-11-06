@@ -54,19 +54,18 @@ class Rover {
     };
   }
 
-  public drive(unit: Units, value: number, speed: number){
+  public drive(unit: Units, value: number, speed: number) {
     const effRepetitions: number = unit == 4 ? value / config.fieldsPerDeg : value;
     const effUnit: number = unit == 4 ? MoveUnit.Degrees : unit;
 
-    console.log("" + effRepetitions);
+    console.log('' + effRepetitions);
     motors.largeA.run(speed, effRepetitions, effUnit);
   }
-
 
   public steer(degrees: number, speed: number) {
     if (degrees > config.maxEffectiveDegrees) degrees = config.maxEffectiveDegrees;
 
-    const steerPerDegree : number = (config.maxSteerMotorDegrees / config.maxEffectiveDegrees);
+    const steerPerDegree: number = config.maxSteerMotorDegrees / config.maxEffectiveDegrees;
     const real: number = degrees * steerPerDegree - motors.mediumD.angle();
 
     motors.mediumD.run(speed, real, MoveUnit.Degrees);

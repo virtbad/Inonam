@@ -73,7 +73,7 @@ class Maneuvers {
   }
 
   public minimalRadius(maximalAngle: number) {
-    let o: number = this.length / Math.tan(MathUtils.toRadiants(maximalAngle));
+    let o: number = this.length / Math.tan(MathUtils.toRadians(maximalAngle));
     return o - this.width / 2;
   }
 }

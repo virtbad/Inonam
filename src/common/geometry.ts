@@ -9,8 +9,8 @@ class Point {
   }
 
   public getCoordinateFromDistance(distance: number, angle: number): Point {
-    const sinL: number = Math.sin(MathUtils.toRadiants(angle)) * distance;
-    const cosL: number = Math.cos(MathUtils.toRadiants(angle)) * distance;
+    const sinL: number = Math.sin(MathUtils.toRadians(angle)) * distance;
+    const cosL: number = Math.cos(MathUtils.toRadians(angle)) * distance;
     return new Point(this.x + cosL, this.y + sinL);
   }
 
@@ -33,7 +33,7 @@ class Line {
   }
 
   public fromAngle(p: Point, a: number): void {
-    this.m = Math.tan(MathUtils.toRadiants(a));
+    this.m = Math.tan(MathUtils.toRadians(a));
     this.q = p.y - p.x * this.m;
   }
 

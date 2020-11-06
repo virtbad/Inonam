@@ -7,7 +7,7 @@ class Queue {
     this._queue = [];
     this._currentInstructions = [];
     this._rover = rover;
-    this._pathfinding = pathfinding
+    this._pathfinding = pathfinding;
   }
 
   public add(point: Point) {
@@ -15,7 +15,7 @@ class Queue {
   }
 
   public addInstructions(instructions: Instruction[]) {
-    console.log("New Instructions");
+    console.log('New Instructions');
     instructions.forEach((instruction: Instruction) => {
       this._currentInstructions.push(instruction);
     });
@@ -37,7 +37,7 @@ class Queue {
     if (this._currentInstructions.length != 0) {
       const shift: Instruction = this._currentInstructions.shift();
 
-      if (!shift.angle || shift.angle == 0) this.solveDriveInstruction(shift) 
+      if (!shift.angle || shift.angle == 0) this.solveDriveInstruction(shift);
       else this.solveSteerInstruction(shift);
     }
 
@@ -47,23 +47,22 @@ class Queue {
   }
 
   public solveDriveInstruction(instruction: Instruction) {
-    console.log("Solving Drive Instruction");
-    console.log("Amount to go: " + instruction.length);
+    console.log('Solving Drive Instruction');
+    console.log('Amount to go: ' + instruction.length);
     this._rover.drive(Units.Centimeters, instruction.length, 20);
-    console.log("Finished Driving");
+    console.log('Finished Driving');
   }
 
   private solveSteerInstruction(instruction: Instruction) {
-    console.log("Solving Steer Instruction");
+    console.log('Solving Steer Instruction');
 
-    console.log("Amount to go: " + instruction.length);
-    console.log("Amount to steer: " + instruction.angle);
+    console.log('Amount to go: ' + instruction.length);
+    console.log('Amount to steer: ' + instruction.angle);
 
     this._rover.steer(instruction.angle, 20);
-    console.log("Driving in Steer Instruction");
+    console.log('Driving in Steer Instruction');
     this._rover.drive(Units.Centimeters, instruction.length, 20);
     this._rover.steer(-instruction.angle, 20);
-    console.log("Finished Steering");
-
+    console.log('Finished Steering');
   }
 }
