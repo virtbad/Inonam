@@ -29,8 +29,6 @@ rover.onEvent((event: RoverEvent, distance: number, coordinate?: Point) => {
       break;
     case RoverEvent.GYRO:
       break;
-    case RoverEvent.STEER:
-      break;
   }
 });
 

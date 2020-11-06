@@ -1,7 +1,6 @@
 enum RoverEvent {
-  STEER = 1,
-  DRIVE = 2,
-  GYRO = 3
+  DRIVE = 1,
+  GYRO = 2
 }
 
 enum Units {
@@ -35,7 +34,6 @@ enum ClawPosition {
 class Rover {
   public position: Point;
   public driveDegrees: number;
-  public steerDegrees: number;
   public gyroDegrees: number;
   public positions: {
     claw: ClawPosition;
@@ -44,7 +42,6 @@ class Rover {
   constructor() {
     this.position = config.startCoordinate;
     this.driveDegrees = motors.largeA.angle();
-    this.steerDegrees = motors.mediumD.angle();
     this.gyroDegrees = sensors.gyro4.angle();
     this.positions = {
       claw: ClawPosition.Open,
@@ -108,22 +105,18 @@ class Rover {
     control.runInParallel(() => {
       forever(() => {
         const currentDriveAngle: number = motors.largeA.angle();
-        const currentSteerAngle: number = motors.mediumD.angle();
         const currentGyroAngle: number = sensors.gyro4.angle();
-        if (currentSteerAngle != this.steerDegrees) {
-          handler(1, currentSteerAngle - this.steerDegrees);
-          this.steerDegrees = currentSteerAngle;
-        }
         if (currentDriveAngle != this.driveDegrees) {
           const difference: number = currentDriveAngle - this.driveDegrees;
           this.driveDegrees = currentDriveAngle;
           this.position = this.position.getCoordinateFromDistance(difference * config.fieldsPerDeg, this.gyroDegrees);
-          handler(2, difference, this.position);
+          handler(1, difference, this.position);
         }
         if (currentGyroAngle != this.gyroDegrees) {
-          handler(3, currentGyroAngle - this.gyroDegrees);
+          handler(2, currentGyroAngle - this.gyroDegrees);
           this.gyroDegrees = currentGyroAngle;
         }
+        pause(250);
       });
     });
   }
