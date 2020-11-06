@@ -4,54 +4,50 @@ interface QueueStructure {
 }
 
 class Queue {
-  private _queue: Array<Point>;
-  private _currentInstructions: Array<Instruction>;
-  private _currentInstruciton: QueueStructure;
+  public openPoints: Array<Point>;
+  public foundPoints: Array<Point>;
+  private _current: QueueStructure;
   private _rover: Rover;
   private _pathfinding: Maneuvers;
   constructor(rover: Rover, pathfinding: Maneuvers) {
-    this._queue = [];
-    this._currentInstructions = [];
+    this.openPoints = [];
     this._rover = rover;
     this._pathfinding = pathfinding;
   }
 
   public add(point: Point) {
-    this._queue.push(point);
+    this.openPoints.push(point);
   }
 
   public addInstructions(instructions: Instruction[]) {
-    this._currentInstruciton = {
-      instructions: instructions,
-      toStation: false
-    };
     console.log('New Instructions');
-    instructions.forEach((instruction: Instruction) => {
-      this._currentInstructions.push(instruction);
-    });
+    this._current = {
+      toStation: false,
+      instructions: instructions
+    };
   }
 
   public toStation(): Instruction[] {
-    return this._currentInstructions;
+    return this._current.instructions;
   }
 
   public shift(): Function {
-    if (this._currentInstruciton == null) {
-      this._currentInstruciton = { toStation: false, instructions: this._pathfinding.findToObject(this._queue.shift()) };
-    } else if (this._currentInstruciton.instructions.length != 0) {
-      const i: Instruction = this._currentInstruciton.instructions.shift();
+    if (this._current == null) {
+      this._current = { toStation: false, instructions: this._pathfinding.findToObject(this.openPoints.shift()) };
+    } else if (this._current.instructions.length != 0) {
+      const i: Instruction = this._current.instructions.shift();
       if (!i.angle || i.angle == 0) {
         this.solveDrive(i);
       } else {
         this.solveSteer(i);
       }
-    } else if (!this._currentInstruciton.toStation) {
+    } else if (!this._current.toStation) {
       this.pickupItem();
-      this._currentInstruciton.toStation = true;
-      this._currentInstruciton.instructions.push(...this.toStation());
+      this._current.toStation = true;
+      this._current.instructions.push(...this.toStation());
     } else {
       this.releaseItem();
-      this._currentInstruciton = null;
+      this._current = null;
     }
     pause(1000);
     return this.shift();
@@ -59,15 +55,14 @@ class Queue {
 
   public solveDrive(instruction: Instruction) {
     console.log('Solving Drive Instruction');
-    console.log('Amount to go: ' + instruction.length);
+    console.log(`Length: ${instruction.length}`);
     this._rover.drive(Units.Centimeters, instruction.length, 20);
     console.log('Finished Driving');
   }
 
   private solveSteer(instruction: Instruction) {
     console.log('Solving Steer Instruction');
-    console.log('Amount to go: ' + instruction.length);
-    console.log('Amount to steer: ' + instruction.angle);
+    console.log(`Length: ${instruction.length}, Angle: ${instruction.angle}`);
     this._rover.steer(instruction.angle, 20);
     console.log('Driving in Steer Instruction');
     this._rover.drive(Units.Centimeters, instruction.length, 20);

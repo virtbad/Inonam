@@ -9,15 +9,19 @@ const pathfinding: Maneuvers = new Maneuvers(config.size.width, config.size.leng
 pathfinding.update(new Point(10, 10), 30);
 
 const queue: Queue = new Queue(rover, pathfinding);
-let objects: Array<Instruction[]> = [];
 
 let test: number = 1;
 
-finder.onFind((coordinate: Point) => {
+finder.onFind((point: Point) => {
   if (test == 2) return;
-  console.log(`Spotted Object [${coordinate.x}, ${coordinate.y}]`);
-  queue.addInstructions(pathfinding.findToObject(new Point(100, 100)));
+  console.log(`Spotted Object [${point.x}, ${point.y}]`);
+  if (!Finder.alreadyFound(point, [...queue.foundPoints, ...queue.openPoints])) {
+    queue.addInstructions(pathfinding.findToObject(new Point(100, 100)));
+  } else {
+    console.log('Already found this point');
+  }
   //queue.addInstructions(pathfinding.findToObject(new Point(coordinate.x, coordinate.y)));
+  queue.add(point);
   test = 2;
 });
 

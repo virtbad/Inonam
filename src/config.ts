@@ -29,7 +29,7 @@ const config: configOptions = {
   stationCoordinate: new Point(0, 50),
   startCoordinate: new Point(0, 20),
   dimensions: { x: 200, y: 200 },
-  size: { width: 15, length: 22 },
+  size: { width: 15.5, length: 22 },
   craneRotationCount: 40,
   clawRotationCount: 10,
   maxSteerMotorDegrees: 95,
