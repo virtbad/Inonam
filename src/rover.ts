@@ -27,6 +27,11 @@ enum CraneDirection {
 }
 
 enum ClawPosition {
+  Open = 1,
+  Close = -1
+}
+
+enum CageDirection {
   Open = -1,
   Close = 1
 }
@@ -35,18 +40,18 @@ class Rover {
   public position: Point;
   public driveDegrees: number;
   public gyroDegrees: number;
+  private events: Array<(event: RoverEvent, distance: number, coordinate?: Point) => void>;
   public positions: {
-    claw: ClawPosition;
-    crane: CraneDirection;
+    cage: CageDirection;
   };
   constructor() {
     this.position = config.startCoordinate;
     this.driveDegrees = motors.largeA.angle();
     this.gyroDegrees = sensors.gyro4.angle();
     this.positions = {
-      claw: ClawPosition.Open,
-      crane: CraneDirection.Down
+      cage: CageDirection.Open
     };
+    this.handleEvents();
   }
 
   public drive(unit: Units, value: number, speed: number) {
@@ -60,48 +65,24 @@ class Rover {
   public steer(degrees: number, speed: number) {
     if (degrees > config.maxEffectiveDegrees) degrees = config.maxEffectiveDegrees;
     if (degrees < -config.maxEffectiveDegrees) degrees = -config.maxEffectiveDegrees;
-
     const steerPerDegree: number = config.maxSteerMotorDegrees / config.maxEffectiveDegrees;
     const real: number = degrees * steerPerDegree - motors.mediumD.angle();
     motors.mediumD.pauseUntilReady();
     motors.mediumD.run(speed, real, MoveUnit.Degrees);
   }
 
+  public cage(direction: CageDirection, speed: number) {
+    if (direction != this.positions.cage) {
+      motors.mediumC.pauseUntilReady();
+      motors.mediumC.run(direction * speed, config.maxCageMotorDegrees, MoveUnit.Degrees);
+    }
+  }
+
   public stopAll(): void {
     motors.stopAll();
   }
 
-  /*
-   * Not sure if motor
-   * directions are correct.
-   * Manual testing required.
-   */
-
-  public moveCrane(direction: CraneDirection, speed: number): void {
-    if (this.positions.crane == direction) {
-    } else {
-      motors.largeC.pauseUntilReady();
-      motors.largeC.run(direction * speed, config.craneRotationCount, MoveUnit.Rotations);
-      this.positions.crane = direction;
-    }
-  }
-
-  /*
-   * Not sure if motor
-   * directions are correct.
-   * Manual testing required.
-   */
-
-  public useClaw(operation: ClawPosition, speed: number): void {
-    if (this.positions.claw == operation) {
-    } else {
-      motors.mediumB.pauseUntilReady();
-      motors.mediumB.run(operation * speed, config.clawRotationCount, MoveUnit.Rotations);
-      this.positions.claw = operation;
-    }
-  }
-
-  public onEvent(handler: (event: RoverEvent, distance: number, coordinate?: Point) => void): void {
+  private handleEvents() {
     control.runInParallel(() => {
       forever(() => {
         const currentDriveAngle: number = motors.largeA.angle();
@@ -110,14 +91,22 @@ class Rover {
           const difference: number = currentDriveAngle - this.driveDegrees;
           this.driveDegrees = currentDriveAngle;
           this.position = this.position.getCoordinateFromDistance(difference * config.fieldsPerDeg, this.gyroDegrees);
-          handler(1, difference, this.position);
+          this.events.forEach((handler: (event: RoverEvent, distance: number, coordinate?: Point) => void) => {
+            handler(1, difference, this.position);
+          });
         }
         if (currentGyroAngle != this.gyroDegrees) {
-          handler(2, currentGyroAngle - this.gyroDegrees);
+          this.events.forEach((handler: (event: RoverEvent, distance: number, coordinate?: Point) => void) => {
+            handler(2, currentGyroAngle - this.gyroDegrees);
+          });
           this.gyroDegrees = currentGyroAngle;
         }
         pause(250);
       });
     });
+  }
+
+  public onEvent(handler: (event: RoverEvent, distance: number, coordinate?: Point) => void): void {
+    this.events.push(handler);
   }
 }

@@ -42,9 +42,9 @@ class Queue {
         this.solveSteer(i);
       }
     } else if (!this._current.toStation) {
-      this.pickupItem();
+      this.cageItem();
       this._current.toStation = true;
-      this._current.instructions.push(...this.toStation());
+      this._current.instructions = this.toStation();
     } else {
       this.releaseItem();
       this._current = null;
@@ -70,24 +70,16 @@ class Queue {
     console.log('Finished Steering');
   }
 
-  public pickupItem() {
-    console.log('Picking item up');
-    this._rover.useClaw(-1, 20);
-    console.log('Opened claw');
-    this._rover.moveCrane(1, 20);
-    console.log('Moved crane down');
-    pause(1000);
-    this._rover.useClaw(1, 20);
-    console.log('Closed claw');
-    this._rover.moveCrane(1, 20);
-    console.log('Picked item up');
+  public cageItem() {
+    console.log('Putting item into cage');
+    this._rover.cage(CageDirection.Close, 20);
+    console.log('Item is in cage');
   }
 
   public releaseItem() {
     console.log('Releasing item');
-    this._rover.useClaw(-1, 20);
+    this._rover.cage(CageDirection.Open, 20);
     pause(1000);
     console.log('Released item');
-    this._rover.useClaw(1, 20);
   }
 }

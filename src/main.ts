@@ -15,7 +15,7 @@ let test: number = 1;
 finder.onFind((point: Point) => {
   if (test == 2) return;
   console.log(`Spotted Object [${point.x}, ${point.y}]`);
-  if (!Finder.alreadyFound(point, [...queue.foundPoints, ...queue.openPoints])) {
+  if (!Finder.alreadyFound(point, queue.foundPoints) && !Finder.alreadyFound(point, queue.openPoints)) {
     queue.addInstructions(pathfinding.findToObject(new Point(100, 100)));
   } else {
     console.log('Already found this point');
@@ -35,10 +35,6 @@ rover.onEvent((event: RoverEvent, distance: number, coordinate?: Point) => {
       break;
   }
 });
-
-function newPoint(point: Point) {
-  queue.add(point);
-}
 
 control.runInParallel(() => queue.shift());
 
