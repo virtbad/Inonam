@@ -1,9 +1,9 @@
 class Instruction {
 
   public length: number;
-  public angle: number;
-  constructor(length: number, angle?: number) {
+  public radius: number;
+  constructor(length: number, radius?: number) {
     this.length = length;
-    this.angle = angle;
+    this.radius = radius;
   }
 }

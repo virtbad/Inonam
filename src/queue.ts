@@ -36,7 +36,7 @@ class Queue {
       this._current = { toStation: false, instructions: this._pathfinding.findToObject(this.openPoints.shift()) };
     } else if (this._current.instructions.length != 0) {
       const i: Instruction = this._current.instructions.shift();
-      if (!i.angle || i.angle == 0) {
+      if (!i.radius || i.radius == 0) {
         this.solveDrive(i);
       } else {
         this.solveSteer(i);
@@ -44,7 +44,7 @@ class Queue {
     } else if (!this._current.toStation) {
       this.pickupItem();
       this._current.toStation = true;
-      this._current.instructions.push(...this.toStation());
+      //this._current.instructions = [...this._current.instructions, ...this.toStation()];
     } else {
       this.releaseItem();
       this._current = null;
@@ -56,17 +56,17 @@ class Queue {
   public solveDrive(instruction: Instruction) {
     console.log('Solving Drive Instruction');
     console.log(`Length: ${instruction.length}`);
-    this._rover.drive(Units.Centimeters, instruction.length, 20);
+    this._rover.drive(instruction.length, 50);
     console.log('Finished Driving');
   }
 
   private solveSteer(instruction: Instruction) {
     console.log('Solving Steer Instruction');
-    console.log(`Length: ${instruction.length}, Angle: ${instruction.angle}`);
-    this._rover.steer(instruction.angle, 20);
+    console.log(`Length: ${instruction.length}, Angle: ${instruction.radius}`);
+    this._rover.steer(instruction.radius, 20);
     console.log('Driving in Steer Instruction');
-    this._rover.drive(Units.Centimeters, instruction.length, 20);
-    this._rover.steer(-instruction.angle, 20);
+    this._rover.drive(instruction.length, 50);
+    this._rover.resetSteer(20);
     console.log('Finished Steering');
   }
 

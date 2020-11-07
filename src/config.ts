@@ -9,6 +9,7 @@ interface configOptions {
   startCoordinate: Point;
   dimensions: { x: number; y: number };
   size: { width: number; length: number };
+  steer: { a: number; b: number, c: number, maxMotorAngle: number, minimalSteerRadius: number };
   craneRotationCount: number;
   clawRotationCount: number;
   maxSteerMotorDegrees: number;
@@ -30,6 +31,7 @@ const config: configOptions = {
   startCoordinate: new Point(0, 20),
   dimensions: { x: 200, y: 200 },
   size: { width: 15.5, length: 22 },
+  steer: {a: 0.03, b: -5.4033, c: 282.85, maxMotorAngle: 91, minimalSteerRadius: 40},
   craneRotationCount: 40,
   clawRotationCount: 10,
   maxSteerMotorDegrees: 95,
