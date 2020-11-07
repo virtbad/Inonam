@@ -49,12 +49,21 @@ class Rover {
     };
   }
 
-  public drive(unit: Units, value: number, speed: number) {
-    const effRepetitions: number = unit == 4 ? value / config.fieldsPerDeg : value;
-    const effUnit: number = unit == 4 ? MoveUnit.Degrees : unit;
+  public drive(value: number, speed: number) {
+    const eff: number = value / config.fieldsPerDeg;
+    console.log("Degs: " + eff)
+
+    const modulo : number = eff % 5000;
+    const iter : number = (eff - modulo) / 5000;
+
+    for (let i = 0; i < iter; i++) {
+      motors.largeA.pauseUntilReady();
+      motors.largeA.run(speed, 5000, MoveUnit.Degrees);
+      motors.largeA.reset();
+    }
     motors.largeA.pauseUntilReady();
-    console.log('' + effRepetitions);
-    motors.largeA.run(speed, effRepetitions, effUnit);
+    motors.largeA.run(speed, modulo, MoveUnit.Degrees);
+    motors.largeA.reset();
   }
 
   // DEPRECATED
@@ -73,6 +82,8 @@ class Rover {
     degrees = degrees.filter(value => value < config.steer.maxMotorAngle);
     if (degrees.length > 0){
       const amount = degrees[0] * (radius < 0 ? -1 : 1);
+
+      console.log(`Amount to steer ${amount}`)
 
       motors.mediumD.pauseUntilReady();
       motors.mediumD.run(speed, amount - motors.mediumD.angle(), MoveUnit.Degrees);

@@ -44,7 +44,7 @@ class Queue {
     } else if (!this._current.toStation) {
       this.pickupItem();
       this._current.toStation = true;
-      this._current.instructions = [...this._current.instructions, ...this.toStation()];
+      //this._current.instructions = [...this._current.instructions, ...this.toStation()];
     } else {
       this.releaseItem();
       this._current = null;
@@ -56,7 +56,7 @@ class Queue {
   public solveDrive(instruction: Instruction) {
     console.log('Solving Drive Instruction');
     console.log(`Length: ${instruction.length}`);
-    this._rover.drive(Units.Centimeters, instruction.length, 50);
+    this._rover.drive(instruction.length, 50);
     console.log('Finished Driving');
   }
 
@@ -65,7 +65,7 @@ class Queue {
     console.log(`Length: ${instruction.length}, Angle: ${instruction.radius}`);
     this._rover.steer(instruction.radius, 20);
     console.log('Driving in Steer Instruction');
-    this._rover.drive(Units.Centimeters, instruction.length, 50);
+    this._rover.drive(instruction.length, 50);
     this._rover.resetSteer(20);
     console.log('Finished Steering');
   }
