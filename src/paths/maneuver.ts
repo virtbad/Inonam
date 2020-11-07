@@ -67,4 +67,13 @@ class Maneuvers {
     this.p = p;
     this.a = a;
   }
+
+  public steerAngleFromRadius(radius: number) {
+    return MathUtils.toDegrees(Math.atan(this.length / (radius + this.width / 2)));
+  }
+
+  public minimalRadius(maximalAngle: number) {
+    let o: number = this.length / Math.tan(MathUtils.toRadians(maximalAngle));
+    return o - this.width / 2;
+  }
 }

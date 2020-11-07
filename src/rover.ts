@@ -54,13 +54,13 @@ class Rover {
     this.handleEvents();
   }
 
+
   public drive(value: number, speed: number) {
     const eff: number = value / config.fieldsPerDeg;
     console.log("Degs: " + eff)
-
     const modulo : number = eff % 5000;
     const iter : number = (eff - modulo) / 5000;
-
+    
     for (let i = 0; i < iter; i++) {
       motors.largeA.pauseUntilReady();
       motors.largeA.run(speed, 5000, MoveUnit.Degrees);

@@ -1,5 +1,5 @@
 class MathUtils {
-  public static toRadiants(degrees: number): number {
+  public static toRadians(degrees: number): number {
     return (degrees / 180) * Math.PI;
   }
 

@@ -53,6 +53,7 @@ class Queue {
     return this.shift();
   }
 
+
   public solveDrive(instruction: Instruction) {
     console.log('Solving Drive Instruction');
     console.log(`Length: ${instruction.length}`);
