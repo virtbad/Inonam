@@ -1,68 +1,86 @@
+interface QueueStructure {
+  toStation: boolean;
+  instructions: Array<Instruction>;
+}
+
 class Queue {
-  private _queue: Array<Point>;
-  private _currentInstructions: Array<Instruction>;
+  public openPoints: Array<Point>;
+  public foundPoints: Array<Point>;
+  private _current: QueueStructure;
   private _rover: Rover;
   private _pathfinding: Maneuvers;
   constructor(rover: Rover, pathfinding: Maneuvers) {
-    this._queue = [];
-    this._currentInstructions = [];
+    this.openPoints = [];
     this._rover = rover;
     this._pathfinding = pathfinding;
   }
 
   public add(point: Point) {
-    this._queue.push(point);
+    this.openPoints.push(point);
   }
 
   public addInstructions(instructions: Instruction[]) {
     console.log('New Instructions');
-    instructions.forEach((instruction: Instruction) => {
-      this._currentInstructions.push(instruction);
-    });
+    this._current = {
+      toStation: false,
+      instructions: instructions
+    };
   }
 
-  public toNewPoint(): boolean {
-    if (this._queue.length != 0) {
-      if (this._currentInstructions.length != 0) {
-        const shift: Instruction[] = pathfinding.findToObject(this._queue.shift());
-        shift.forEach((instruction: Instruction) => this._currentInstructions.push(instruction));
-        return true;
-      } else return false;
-    } else return false;
+  public toStation(): Instruction[] {
+    return this._current.instructions;
   }
-
-  public toStation(): void {}
 
   public shift(): Function {
-    if (this._currentInstructions.length != 0) {
-      const shift: Instruction = this._currentInstructions.shift();
-
-      if (!shift.angle || shift.angle == 0) this.solveDriveInstruction(shift);
-      else this.solveSteerInstruction(shift);
+    if (this._current == null) {
+      this._current = { toStation: false, instructions: this._pathfinding.findToObject(this.openPoints.shift()) };
+    } else if (this._current.instructions.length != 0) {
+      const i: Instruction = this._current.instructions.shift();
+      if (!i.radius || i.radius == 0) {
+        this.solveDrive(i);
+      } else {
+        this.solveSteer(i);
+      }
+    } else if (!this._current.toStation) {
+      this.cageItem();
+      this._current.toStation = true;
+      this._current.instructions = this.toStation();
+    } else {
+      this.releaseItem();
+      this._current = null;
     }
-
     pause(1000);
-
     return this.shift();
   }
 
-  public solveDriveInstruction(instruction: Instruction) {
+
+  public solveDrive(instruction: Instruction) {
     console.log('Solving Drive Instruction');
-    console.log('Amount to go: ' + instruction.length);
-    this._rover.drive(Units.Centimeters, instruction.length, 20);
+    console.log(`Length: ${instruction.length}`);
+    this._rover.drive(instruction.length, 50);
     console.log('Finished Driving');
   }
 
-  private solveSteerInstruction(instruction: Instruction) {
+  private solveSteer(instruction: Instruction) {
     console.log('Solving Steer Instruction');
-
-    console.log('Amount to go: ' + instruction.length);
-    console.log('Amount to steer: ' + instruction.angle);
-
-    this._rover.steer(instruction.angle, 20);
+    console.log(`Length: ${instruction.length}, Angle: ${instruction.radius}`);
+    this._rover.steer(instruction.radius, 20);
     console.log('Driving in Steer Instruction');
-    this._rover.drive(Units.Centimeters, instruction.length, 20);
-    this._rover.steer(-instruction.angle, 20);
+    this._rover.drive(instruction.length, 50);
+    this._rover.resetSteer(20);
     console.log('Finished Steering');
+  }
+
+  public cageItem() {
+    console.log('Putting item into cage');
+    this._rover.cage(CageDirection.Close, 20);
+    console.log('Item is in cage');
+  }
+
+  public releaseItem() {
+    console.log('Releasing item');
+    this._rover.cage(CageDirection.Open, 20);
+    pause(1000);
+    console.log('Released item');
   }
 }

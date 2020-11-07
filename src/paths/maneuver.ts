@@ -7,12 +7,12 @@ class Maneuvers {
   private p: Point; // Position
   private a: number; // Angle
 
-  constructor(width: number, length: number, maximalSteer: number) {
+  constructor(width: number, length: number, minimalRadius: number) {
     this.p = new Point(config.startCoordinate.x, config.startCoordinate.y);
     this.a = 0;
     this.width = width;
     this.length = length;
-    this.minR = this.minimalRadius(maximalSteer);
+    this.minR = minimalRadius;
   }
 
   public findToObject(t: Point): Instruction[] {
@@ -56,7 +56,7 @@ class Maneuvers {
     let phi: number = 2 * MathUtils.toDegrees(Math.asin(k / 2 / circle.r));
 
     let circleDistance: number = (circle.getExtent() / 360) * phi;
-    let angle: number = this.steerAngleFromRadius(circle.r);
+    let angle: number = circle.r;
 
     instructions.push(new Instruction(circleDistance, angle));
 

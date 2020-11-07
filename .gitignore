@@ -2,6 +2,7 @@ pxt_modules
 built
 deployconfig.json
 MindstormsDeploy.jar
+MindstormsDeploy-1.2.1.jar
 .header.json
 .simstate.json
 pxt.json
