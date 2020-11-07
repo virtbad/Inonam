@@ -54,15 +54,25 @@ class Rover {
     this.handleEvents();
   }
 
-  public drive(unit: Units, value: number, speed: number) {
-    const effRepetitions: number = unit == 4 ? value / config.fieldsPerDeg : value;
-    const effUnit: number = unit == 4 ? MoveUnit.Degrees : unit;
+  public drive(value: number, speed: number) {
+    const eff: number = value / config.fieldsPerDeg;
+    console.log("Degs: " + eff)
+
+    const modulo : number = eff % 5000;
+    const iter : number = (eff - modulo) / 5000;
+
+    for (let i = 0; i < iter; i++) {
+      motors.largeA.pauseUntilReady();
+      motors.largeA.run(speed, 5000, MoveUnit.Degrees);
+      motors.largeA.reset();
+    }
     motors.largeA.pauseUntilReady();
-    console.log('' + effRepetitions);
-    motors.largeA.run(speed, effRepetitions, effUnit);
+    motors.largeA.run(speed, modulo, MoveUnit.Degrees);
+    motors.largeA.reset();
   }
 
-  public steer(degrees: number, speed: number) {
+  // DEPRECATED
+  public steerWithDegrees(degrees: number, speed: number) {
     if (degrees > config.maxEffectiveDegrees) degrees = config.maxEffectiveDegrees;
     if (degrees < -config.maxEffectiveDegrees) degrees = -config.maxEffectiveDegrees;
     const steerPerDegree: number = config.maxSteerMotorDegrees / config.maxEffectiveDegrees;
@@ -71,11 +81,28 @@ class Rover {
     motors.mediumD.run(speed, real, MoveUnit.Degrees);
   }
 
+
   public cage(direction: CageDirection, speed: number) {
     if (direction != this.positions.cage) {
       motors.mediumC.pauseUntilReady();
       motors.mediumC.run(direction * speed, config.maxCageMotorDegrees, MoveUnit.Degrees);
     }
+  }
+    
+  public steer(radius: number, speed: number) {
+    let degrees : number[] = MathUtils.solveQuadratic(Math.abs(radius), config.steer.a, config.steer.b, config.steer.c);
+    degrees = degrees.filter(value => value < config.steer.maxMotorAngle);
+    if (degrees.length > 0){
+      const amount = degrees[0] * (radius < 0 ? -1 : 1);
+      console.log(`Amount to steer ${amount}`)
+      motors.mediumD.pauseUntilReady();
+      motors.mediumD.run(speed, amount - motors.mediumD.angle(), MoveUnit.Degrees);
+    } else console.log("Received Invalid steer Radius");
+  }
+
+  public resetSteer(speed: number) {
+    motors.mediumD.pauseUntilReady();
+    motors.mediumD.run(speed, -motors.mediumD.angle(), MoveUnit.Degrees);
   }
 
   public stopAll(): void {

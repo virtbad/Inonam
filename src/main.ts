@@ -4,7 +4,7 @@ console.sendToScreen();
 const rover: Rover = new Rover();
 const finder: Finder = new Finder(rover);
 
-const pathfinding: Maneuvers = new Maneuvers(config.size.width, config.size.length, config.maxEffectiveDegrees);
+const pathfinding: Maneuvers = new Maneuvers(config.size.width, config.size.length, config.steer.minimalSteerRadius);
 
 pathfinding.update(new Point(10, 10), 30);
 
@@ -20,6 +20,7 @@ finder.onFind((point: Point) => {
   } else {
     console.log('Already found this point');
   }
+  
   //queue.addInstructions(pathfinding.findToObject(new Point(coordinate.x, coordinate.y)));
   queue.add(point);
   test = 2;
@@ -36,7 +37,11 @@ rover.onEvent((event: RoverEvent, distance: number, coordinate?: Point) => {
   }
 });
 
-control.runInParallel(() => queue.shift());
+//control.runInParallel(() => queue.shift());
+rover.steer(40, 20);
+console.log("Extent: " + new Circle(null, 40).getExtent());
+rover.drive(new Circle(null, 47.5).getExtent(), 50);
+rover.resetSteer(20);
 
 /*
  * 67cm, 5 rot
