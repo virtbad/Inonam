@@ -15,13 +15,12 @@ let test: number = 1;
 finder.onFind((point: Point) => {
   if (test == 2) return;
   console.log(`Spotted Object [${point.x}, ${point.y}]`);
-  /*
-  if (!Finder.alreadyFound(point, [...queue.foundPoints, ...queue.openPoints])) {
+  if (!Finder.alreadyFound(point, queue.foundPoints) && !Finder.alreadyFound(point, queue.openPoints)) {
     queue.addInstructions(pathfinding.findToObject(new Point(100, 100)));
   } else {
     console.log('Already found this point');
   }
-  */
+  
   //queue.addInstructions(pathfinding.findToObject(new Point(coordinate.x, coordinate.y)));
   queue.add(point);
   test = 2;
@@ -38,12 +37,7 @@ rover.onEvent((event: RoverEvent, distance: number, coordinate?: Point) => {
   }
 });
 
-function newPoint(point: Point) {
-  queue.add(point);
-}
-
 //control.runInParallel(() => queue.shift());
-
 rover.steer(40, 20);
 console.log("Extent: " + new Circle(null, 40).getExtent());
 rover.drive(new Circle(null, 47.5).getExtent(), 50);
