@@ -4,7 +4,7 @@ console.sendToScreen();
 const rover: Rover = new Rover();
 const finder: Finder = new Finder(rover);
 
-const pathfinding: Maneuvers = new Maneuvers(config.size.width, config.size.length, config.maxEffectiveDegrees);
+const pathfinding: Maneuvers = new Maneuvers(config.size.width, config.size.length, config.steer.minimalSteerRadius);
 
 pathfinding.update(new Point(10, 10), 30);
 

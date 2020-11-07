@@ -57,7 +57,8 @@ class Rover {
     motors.largeA.run(speed, effRepetitions, effUnit);
   }
 
-  public steer(degrees: number, speed: number) {
+  // DEPRECATED
+  public steerWithDegrees(degrees: number, speed: number) {
     if (degrees > config.maxEffectiveDegrees) degrees = config.maxEffectiveDegrees;
     if (degrees < -config.maxEffectiveDegrees) degrees = -config.maxEffectiveDegrees;
 
@@ -65,6 +66,23 @@ class Rover {
     const real: number = degrees * steerPerDegree - motors.mediumD.angle();
     motors.mediumD.pauseUntilReady();
     motors.mediumD.run(speed, real, MoveUnit.Degrees);
+  }
+
+  public steer(radius: number, speed: number){
+    let degrees : number[] = MathUtils.solveQuadratic(Math.abs(radius), config.steer.a, config.steer.b, config.steer.c);
+    degrees = degrees.filter(value => value < config.steer.maxMotorAngle);
+    if (degrees.length > 0){
+      const amount = degrees[0] * (radius < 0 ? -1 : 1);
+
+      motors.mediumD.pauseUntilReady();
+      motors.mediumD.run(speed, amount - motors.mediumD.angle(), MoveUnit.Degrees);
+
+    }else console.log("Received Invalid steer Radius");
+  }
+
+  public resetSteer(speed: number){
+    motors.mediumD.pauseUntilReady();
+    motors.mediumD.run(speed, -motors.mediumD.angle(), MoveUnit.Degrees);
   }
 
   public stopAll(): void {
