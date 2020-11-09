@@ -1,9 +1,22 @@
 {
-  "name": "Inonam",
-  "description": "",
-  "dependencies": {
-    "ev3": "*"
-  },
-  "files": ["common/math.ts", "common/geometry.ts", "paths/instructions.ts", "paths/maneuver.ts", "station/station.ts", "station/conveyors.ts", "main.ts", "queue.ts", "rover.ts", "finder.ts", "config.ts", "README.md"],
-  "preferredEditor": "tsprj"
+    "name": "Inonam",
+    "description": "",
+    "dependencies": {
+        "ev3": "*"
+    },
+    "files": [
+        "common/math.ts",
+        "common/geometry.ts",
+        "paths/instructions.ts",
+        "paths/maneuver.ts",
+        "station/station.ts",
+        "station/conveyors.ts",
+        "main.ts",
+        "queue.ts",
+        "rover.ts",
+        "finder.ts",
+        "config.ts",
+        "README.md"
+    ],
+    "preferredEditor": "tsprj"
 }

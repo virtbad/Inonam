@@ -1,18 +1,20 @@
-interface QueueStructure {
+/* interface QueueStructure {
   toStation: boolean;
   instructions: Array<Instruction>;
-}
+} */
 
 class Queue {
   public openPoints: Array<Point>;
   public foundPoints: Array<Point>;
-  private _current: QueueStructure;
+  private _current: { toStation: boolean; instructions: Array<Instruction> };
   private _rover: Rover;
   private _pathfinding: Maneuvers;
   constructor(rover: Rover, pathfinding: Maneuvers) {
     this.openPoints = [];
+    this.foundPoints = [];
     this._rover = rover;
     this._pathfinding = pathfinding;
+    this._current = { toStation: false, instructions: null };
   }
 
   public add(point: Point) {
@@ -27,7 +29,7 @@ class Queue {
     };
   }
 
-  public toStation(): Instruction[] {
+  private toStation(): Instruction[] {
     return this._current.instructions;
   }
 
@@ -53,8 +55,7 @@ class Queue {
     return this.shift();
   }
 
-
-  public solveDrive(instruction: Instruction) {
+  private solveDrive(instruction: Instruction) {
     console.log('Solving Drive Instruction');
     console.log(`Length: ${instruction.length}`);
     this._rover.drive(instruction.length, 50);
@@ -71,13 +72,13 @@ class Queue {
     console.log('Finished Steering');
   }
 
-  public cageItem() {
+  private cageItem() {
     console.log('Putting item into cage');
     this._rover.cage(CageDirection.Close, 20);
     console.log('Item is in cage');
   }
 
-  public releaseItem() {
+  private releaseItem() {
     console.log('Releasing item');
     this._rover.cage(CageDirection.Open, 20);
     pause(1000);

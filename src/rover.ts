@@ -32,20 +32,24 @@ enum ClawPosition {
 }
 
 enum CageDirection {
-  Open = -1,
-  Close = 1
+  Open = 1,
+  Close = -1
 }
 
 class Rover {
   public position: Point;
   public driveDegrees: number;
   public gyroDegrees: number;
-  private events: Array<(event: RoverEvent, distance: number, coordinate?: Point) => void>;
+  private driveStopped: boolean;
+  private driveHandlers: Array<(distance: number, coordinate: Point) => void>;
+  private gyroHandlers: Array<(change: number, angle: number) => void>;
   public positions: {
     cage: CageDirection;
   };
   constructor() {
     this.position = config.startCoordinate;
+    this.driveHandlers = [];
+    this.gyroHandlers = [];
     this.driveDegrees = motors.largeA.angle();
     this.gyroDegrees = sensors.gyro4.angle();
     this.positions = {
@@ -54,21 +58,32 @@ class Rover {
     this.handleEvents();
   }
 
-
   public drive(value: number, speed: number) {
     const eff: number = value / config.fieldsPerDeg;
-    console.log("Degs: " + eff)
-    const modulo : number = eff % 5000;
-    const iter : number = (eff - modulo) / 5000;
-    
-    for (let i = 0; i < iter; i++) {
-      motors.largeA.pauseUntilReady();
-      motors.largeA.run(speed, 5000, MoveUnit.Degrees);
-      motors.largeA.reset();
-    }
+    console.log('Degs: ' + eff);
+    const modulo: number = eff % 5000;
+    const iter: number = (eff - modulo) / 5000;
+
     motors.largeA.pauseUntilReady();
     motors.largeA.run(speed, modulo, MoveUnit.Degrees);
     motors.largeA.reset();
+
+    for (let i = 0; i < iter; i++) {
+      if (!this.driveStopped) {
+        motors.largeA.pauseUntilReady();
+        motors.largeA.run(speed, 5000, MoveUnit.Degrees);
+        motors.largeA.reset();
+      } else {
+        this.driveStopped = false;
+        motors.largeA.stop();
+        break;
+      }
+    }
+  }
+
+  public stopDrive(): void {
+    this.driveStopped = true;
+    motors.largeA.stop();
   }
 
   // DEPRECATED
@@ -81,23 +96,22 @@ class Rover {
     motors.mediumD.run(speed, real, MoveUnit.Degrees);
   }
 
-
   public cage(direction: CageDirection, speed: number) {
     if (direction != this.positions.cage) {
       motors.mediumC.pauseUntilReady();
       motors.mediumC.run(direction * speed, config.maxCageMotorDegrees, MoveUnit.Degrees);
     }
   }
-    
+
   public steer(radius: number, speed: number) {
-    let degrees : number[] = MathUtils.solveQuadratic(Math.abs(radius), config.steer.a, config.steer.b, config.steer.c);
-    degrees = degrees.filter(value => value < config.steer.maxMotorAngle);
-    if (degrees.length > 0){
+    let degrees: number[] = MathUtils.solveQuadratic(Math.abs(radius), config.steer.a, config.steer.b, config.steer.c);
+    degrees = degrees.filter((value) => value < config.steer.maxMotorAngle);
+    if (degrees.length > 0) {
       const amount = degrees[0] * (radius < 0 ? -1 : 1);
-      console.log(`Amount to steer ${amount}`)
+      console.log(`Amount to steer ${amount}`);
       motors.mediumD.pauseUntilReady();
       motors.mediumD.run(speed, amount - motors.mediumD.angle(), MoveUnit.Degrees);
-    } else console.log("Received Invalid steer Radius");
+    } else console.log('Received Invalid steer Radius');
   }
 
   public resetSteer(speed: number) {
@@ -111,6 +125,7 @@ class Rover {
 
   private handleEvents() {
     control.runInParallel(() => {
+      console.log('init new eventhandler');
       forever(() => {
         const currentDriveAngle: number = motors.largeA.angle();
         const currentGyroAngle: number = sensors.gyro4.angle();
@@ -118,22 +133,22 @@ class Rover {
           const difference: number = currentDriveAngle - this.driveDegrees;
           this.driveDegrees = currentDriveAngle;
           this.position = this.position.getCoordinateFromDistance(difference * config.fieldsPerDeg, this.gyroDegrees);
-          this.events.forEach((handler: (event: RoverEvent, distance: number, coordinate?: Point) => void) => {
-            handler(1, difference, this.position);
-          });
+          this.driveHandlers.forEach((handler: (distance: number, point: Point) => void) => handler(difference, this.position));
         }
         if (currentGyroAngle != this.gyroDegrees) {
-          this.events.forEach((handler: (event: RoverEvent, distance: number, coordinate?: Point) => void) => {
-            handler(2, currentGyroAngle - this.gyroDegrees);
-          });
+          this.gyroHandlers.forEach((handler: (change: number, angle: number) => void) => handler(currentGyroAngle - this.gyroDegrees, currentGyroAngle));
           this.gyroDegrees = currentGyroAngle;
         }
-        pause(250);
+        pause(200);
       });
     });
   }
 
-  public onEvent(handler: (event: RoverEvent, distance: number, coordinate?: Point) => void): void {
-    this.events.push(handler);
+  public onGyro(handler: (change: number, angle: number) => void) {
+    this.gyroHandlers.push(handler);
+  }
+
+  public onDrive(handler: (distance: number, point: Point) => void) {
+    this.driveHandlers.push(handler);
   }
 }

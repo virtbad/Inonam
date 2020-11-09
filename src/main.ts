@@ -3,6 +3,7 @@ console.sendToScreen();
 
 const rover: Rover = new Rover();
 const finder: Finder = new Finder(rover);
+let circle: { driving: boolean; deg: number } = { driving: false, deg: 0 };
 
 const pathfinding: Maneuvers = new Maneuvers(config.size.width, config.size.length, config.steer.minimalSteerRadius);
 
@@ -20,28 +21,27 @@ finder.onFind((point: Point) => {
   } else {
     console.log('Already found this point');
   }
-  
-  //queue.addInstructions(pathfinding.findToObject(new Point(coordinate.x, coordinate.y)));
   queue.add(point);
   test = 2;
 });
 
-rover.onEvent((event: RoverEvent, distance: number, coordinate?: Point) => {
-  switch (event) {
-    case RoverEvent.DRIVE:
-      if (!coordinate.isInField()) rover.stopAll();
-      pathfinding.update(coordinate, rover.gyroDegrees);
-      break;
-    case RoverEvent.GYRO:
-      break;
-  }
+rover.onDrive((distance: number, point: Point) => {
+  pathfinding.update(point, rover.gyroDegrees);
+});
+
+rover.onGyro((change: number, angle: number) => {
+  console.log('' + angle);
+  if (circle.driving && rover.gyroDegrees >= circle.deg + 360) rover.stopDrive();
 });
 
 //control.runInParallel(() => queue.shift());
-rover.steer(40, 20);
-console.log("Extent: " + new Circle(null, 40).getExtent());
-rover.drive(new Circle(null, 47.5).getExtent(), 50);
+rover.steer(config.steer.minimalSteerRadius, 20);
+//console.log('Extent: ' + new Circle(null, config.steer.minimalSteerRadius).getExtent());
+circle = { driving: true, deg: rover.gyroDegrees };
+//rover.drive(new Circle(null, config.steer.minimalSteerRadius + config.size.width / 2).getExtent(), 50);
+rover.drive(10000, 50);
 rover.resetSteer(20);
+console.log('Arrived');
 
 /*
  * 67cm, 5 rot
