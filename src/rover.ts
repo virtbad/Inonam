@@ -1,80 +1,43 @@
-enum RoverEvent {
-  DRIVE = 1,
-  GYRO = 2
-}
-
-enum Units {
-  Rotations = 0,
-  Degrees = 1,
-  Seconds = 2,
-  Milliseconds = 3,
-  Centimeters = 4
-}
-
-enum DriveDirection {
-  Forwards = 1,
-  Backwards = -1
-}
-
-enum SteerDirection {
-  Left = 1,
-  Right = -1
-}
-
-enum CraneDirection {
-  Up = -1,
-  Down = 1
-}
-
-enum ClawPosition {
-  Open = -1,
-  Close = 1
-}
-
 class Rover {
-  public position: Point;
-  public driveDegrees: number;
-  public gyroDegrees: number;
-  public positions: {
-    claw: ClawPosition;
-    crane: CraneDirection;
-  };
+
+  private driveMotor : motors.Motor;
+  private steerMotor : motors.Motor;
+  private cageMotor : motors.Motor;
+
+  private distanceSensor : sensors.UltraSonicSensor;
+  private orientationSensor : sensors.GyroSensor;
+  
   constructor() {
-    this.position = config.startCoordinate;
-    this.driveDegrees = motors.largeA.angle();
-    this.gyroDegrees = sensors.gyro4.angle();
-    this.positions = {
-      claw: ClawPosition.Open,
-      crane: CraneDirection.Down
-    };
+    this.driveMotor = motors.largeA;
+    this.steerMotor = motors.mediumD;
+    this.cageMotor = motors.mediumC;
+    this.distanceSensor = sensors.ultrasonic3;
+    this.orientationSensor = sensors.gyro4;
   }
 
   public drive(value: number, speed: number) {
     const eff: number = value / config.fieldsPerDeg;
-    console.log("Degs: " + eff)
 
     const modulo : number = eff % 5000;
     const iter : number = (eff - modulo) / 5000;
 
     for (let i = 0; i < iter; i++) {
-      motors.largeA.pauseUntilReady();
-      motors.largeA.run(speed, 5000, MoveUnit.Degrees);
-      motors.largeA.reset();
+      this.driveMotor.pauseUntilReady();
+      this.driveMotor.run(speed, 5000, MoveUnit.Degrees);
+      this.driveMotor.reset();
     }
-    motors.largeA.pauseUntilReady();
-    motors.largeA.run(speed, modulo, MoveUnit.Degrees);
-    motors.largeA.reset();
+    this.driveMotor.pauseUntilReady();
+    this.driveMotor.run(speed, modulo, MoveUnit.Degrees);
+    this.driveMotor.reset();
   }
 
-  // DEPRECATED
-  public steerWithDegrees(degrees: number, speed: number) {
-    if (degrees > config.maxEffectiveDegrees) degrees = config.maxEffectiveDegrees;
-    if (degrees < -config.maxEffectiveDegrees) degrees = -config.maxEffectiveDegrees;
+  public go(speed: number){
+    this.driveMotor.pauseUntilReady();
+    this.driveMotor.run(speed);
+  }
 
-    const steerPerDegree: number = config.maxSteerMotorDegrees / config.maxEffectiveDegrees;
-    const real: number = degrees * steerPerDegree - motors.mediumD.angle();
-    motors.mediumD.pauseUntilReady();
-    motors.mediumD.run(speed, real, MoveUnit.Degrees);
+  public stop(){
+    this.driveMotor.stop();
   }
 
   public steer(radius: number, speed: number){
@@ -85,68 +48,32 @@ class Rover {
 
       console.log(`Amount to steer ${amount}`)
 
-      motors.mediumD.pauseUntilReady();
-      motors.mediumD.run(speed, amount - motors.mediumD.angle(), MoveUnit.Degrees);
+      this.steerMotor.pauseUntilReady();
+      this.steerMotor.run(speed, amount - this.steerMotor.angle(), MoveUnit.Degrees);
 
     }else console.log("Received Invalid steer Radius");
   }
 
   public resetSteer(speed: number){
-    motors.mediumD.pauseUntilReady();
-    motors.mediumD.run(speed, -motors.mediumD.angle(), MoveUnit.Degrees);
+    this.steerMotor.pauseUntilReady();
+    this.steerMotor.run(speed, -this.steerMotor.angle(), MoveUnit.Degrees);
   }
 
-  public stopAll(): void {
-    motors.stopAll();
+  public lowerCage(){
+    this.cageMotor.pauseUntilReady();
+    this.cageMotor.run(10, -275, MoveUnit.Degrees);
   }
 
-  /*
-   * Not sure if motor
-   * directions are correct.
-   * Manual testing required.
-   */
-
-  public moveCrane(direction: CraneDirection, speed: number): void {
-    if (this.positions.crane == direction) {
-    } else {
-      motors.largeC.pauseUntilReady();
-      motors.largeC.run(direction * speed, config.craneRotationCount, MoveUnit.Rotations);
-      this.positions.crane = direction;
-    }
+  public liftCage(){
+    this.cageMotor.pauseUntilReady();
+    this.cageMotor.run(10, 275, MoveUnit.Degrees);
   }
 
-  /*
-   * Not sure if motor
-   * directions are correct.
-   * Manual testing required.
-   */
-
-  public useClaw(operation: ClawPosition, speed: number): void {
-    if (this.positions.claw == operation) {
-    } else {
-      motors.mediumB.pauseUntilReady();
-      motors.mediumB.run(operation * speed, config.clawRotationCount, MoveUnit.Rotations);
-      this.positions.claw = operation;
-    }
+  public getNextObject() : number{
+    return this.distanceSensor.distance();
   }
 
-  public onEvent(handler: (event: RoverEvent, distance: number, coordinate?: Point) => void): void {
-    control.runInParallel(() => {
-      forever(() => {
-        const currentDriveAngle: number = motors.largeA.angle();
-        const currentGyroAngle: number = sensors.gyro4.angle();
-        if (currentDriveAngle != this.driveDegrees) {
-          const difference: number = currentDriveAngle - this.driveDegrees;
-          this.driveDegrees = currentDriveAngle;
-          this.position = this.position.getCoordinateFromDistance(difference * config.fieldsPerDeg, this.gyroDegrees);
-          handler(1, difference, this.position);
-        }
-        if (currentGyroAngle != this.gyroDegrees) {
-          handler(2, currentGyroAngle - this.gyroDegrees);
-          this.gyroDegrees = currentGyroAngle;
-        }
-        pause(250);
-      });
-    });
+  public getOrientation() : number {
+    return this.orientationSensor.angle();
   }
 }
