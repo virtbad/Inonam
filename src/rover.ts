@@ -6,6 +6,9 @@ class Rover {
 
   private distanceSensor : sensors.UltraSonicSensor;
   private orientationSensor : sensors.GyroSensor;
+  private colorSensor : sensors.ColorSensor;
+
+  private lastDegree : number;
   
   constructor() {
     this.driveMotor = motors.largeA;
@@ -13,9 +16,12 @@ class Rover {
     this.cageMotor = motors.mediumC;
     this.distanceSensor = sensors.ultrasonic3;
     this.orientationSensor = sensors.gyro4;
+    this.colorSensor = sensors.color2;
+
+    this.lastDegree = 0;
   }
 
-  public drive(value: number, speed: number) {
+  public driveSecurely(value: number, speed: number) {
     const eff: number = value / config.fieldsPerDeg;
 
     const modulo : number = eff % 5000;
@@ -31,6 +37,15 @@ class Rover {
     this.driveMotor.reset();
   }
 
+  public drive(value: number, speed: number){
+    const eff: number = value / config.fieldsPerDeg;
+    this.driveMotor.run(speed, eff, MoveUnit.Degrees);
+  }
+
+  public resetDrive(){
+    this.driveMotor.reset();
+  }
+
   public go(speed: number){
     this.driveMotor.pauseUntilReady();
     this.driveMotor.run(speed);
@@ -38,6 +53,10 @@ class Rover {
 
   public stop(){
     this.driveMotor.stop();
+  }
+
+  public getDriven() : number{
+    return this.driveMotor.angle()
   }
 
   public steer(radius: number, speed: number){
@@ -60,13 +79,20 @@ class Rover {
   }
 
   public lowerCage(){
-    this.cageMotor.pauseUntilReady();
-    this.cageMotor.run(10, -275, MoveUnit.Degrees);
+    this.setCage(0);
   }
 
   public liftCage(){
+    this.setCage(275);
+  }
+
+  public hoverCage(){
+    this.setCage(20);
+  }
+
+  private setCage(degrees: number){
     this.cageMotor.pauseUntilReady();
-    this.cageMotor.run(10, 275, MoveUnit.Degrees);
+    this.cageMotor.run(10, degrees - this.cageMotor.angle(), MoveUnit.Degrees)
   }
 
   public getNextObject() : number{
@@ -74,6 +100,14 @@ class Rover {
   }
 
   public getOrientation() : number {
-    return this.orientationSensor.angle();
+    return this.orientationSensor.angle() - this.lastDegree;
+  }
+
+  public resetOrientation() {
+    return this.lastDegree = this.orientationSensor.angle();
+  }
+
+  public getColor() : ColorSensorColor {
+    return this.colorSensor.color();
   }
 }
