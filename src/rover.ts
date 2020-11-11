@@ -65,8 +65,6 @@ class Rover {
     if (degrees.length > 0){
       const amount = degrees[0] * (radius < 0 ? -1 : 1);
 
-      console.log(`Amount to steer ${amount}`)
-
       this.steerMotor.pauseUntilReady();
       this.steerMotor.run(speed, amount - this.steerMotor.angle(), MoveUnit.Degrees);
 
@@ -87,7 +85,7 @@ class Rover {
   }
 
   public hoverCage(){
-    this.setCage(20);
+    this.setCage(30);
   }
 
   private setCage(degrees: number){

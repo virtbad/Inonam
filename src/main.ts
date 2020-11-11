@@ -3,17 +3,22 @@ console.sendToScreen();
 
 const rover: Rover = new Rover();
 
-const pickupThreshold : number = 18;
-const steerVariability : number = 1;
+const pickupThreshold : number = 15;
+const steerVariability : number = 3;
+const steeringLoss : number = 5;
 
-//const pathfinding: Maneuvers = new Maneuvers(config.size.width, config.size.length, config.steer.minimalSteerRadius);
-//pathfinding.update(new Point(10, 10), 30);
 
 function main(){
+  console.log("Going to get Next Object")
   if(!getNextObject()) return;
+  console.log("Compensate Loss")
+  //rover.drive(steeringLoss, 10);
+  console.log("Steering for deposit")
   steer(90, 50);
+  console.log("Goint to Station for deposit")
   rover.hoverCage();
   driveToStation();
+  console.log("Steering Back")
   steer(90, -50);
 }
 
@@ -70,7 +75,7 @@ function steer(degrees : number, speed : number){
   rover.steer(40, 20);
   rover.go(speed);
   while(true){
-    if (Math.abs(rover.getOrientation()) - steerVariability >= degrees) break;
+    if (Math.abs(rover.getOrientation()) + steerVariability >= degrees) break;
   }
   rover.stop();
   rover.resetSteer(20);
