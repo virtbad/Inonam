@@ -1,10 +1,12 @@
 // Priority: -1
-console.sendToScreen();
+//console.sendToScreen();
+
+//TODO: Kalibrierung, Zwei Parametersets, Vor und Rückwärts Bewegung
 
 const rover: Rover = new Rover();
 
 const pickupThreshold : number = 15;
-const steerVariability : number = 3;
+const steerVariability : number = 4;
 const steeringLoss : number = 5;
 
 
@@ -71,18 +73,31 @@ function driveToStation(){
 }
 
 function steer(degrees : number, speed : number){
+  pause(1000);
   rover.resetOrientation();
-  rover.steer(40, 20);
+  pause(1000);
+  rover.steer(20);
   rover.go(speed);
   while(true){
     if (Math.abs(rover.getOrientation()) + steerVariability >= degrees) break;
   }
   rover.stop();
+  pause(1000);
   rover.resetSteer(20);
 }
 
-brick.buttonUp.onEvent(ButtonEvent.Pressed, () => rover.liftCage());
-brick.buttonDown.onEvent(ButtonEvent.Pressed, () => rover.lowerCage());
-brick.buttonEnter.onEvent(ButtonEvent.Pressed, () => main());
-brick.buttonRight.onEvent(ButtonEvent.Pressed, () => steer(90, -50));
-brick.buttonLeft.onEvent(ButtonEvent.Pressed, () => steer(90, 50));
+function steerUp(){
+  steer(90, 50);
+}
+
+function steerDown(){
+  steer(90, -50);
+}
+
+let ui : UI = new UI(rover);
+
+//48 / 14
+//42 / 15
+//38 / 13
+//38 / 12
+//40 / 16

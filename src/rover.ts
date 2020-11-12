@@ -9,6 +9,9 @@ class Rover {
   private colorSensor : sensors.ColorSensor;
 
   private lastDegree : number;
+
+  private steeringSpeed : number;
+  private steeringDegrees : number;
   
   constructor() {
     this.driveMotor = motors.largeA;
@@ -19,27 +22,29 @@ class Rover {
     this.colorSensor = sensors.color2;
 
     this.lastDegree = 0;
-  }
-
-  public driveSecurely(value: number, speed: number) {
-    const eff: number = value / config.fieldsPerDeg;
-
-    const modulo : number = eff % 5000;
-    const iter : number = (eff - modulo) / 5000;
-
-    for (let i = 0; i < iter; i++) {
-      this.driveMotor.pauseUntilReady();
-      this.driveMotor.run(speed, 5000, MoveUnit.Degrees);
-      this.driveMotor.reset();
-    }
-    this.driveMotor.pauseUntilReady();
-    this.driveMotor.run(speed, modulo, MoveUnit.Degrees);
-    this.driveMotor.reset();
+    this.steeringSpeed = 5;
+    this.steeringDegrees = 75;
   }
 
   public drive(value: number, speed: number){
     const eff: number = value / config.fieldsPerDeg;
     this.driveMotor.run(speed, eff, MoveUnit.Degrees);
+  }
+
+  public driveSteer(a : number, b : number, c : number, forwards : boolean){
+    this.resetDrive();
+    this.driveMotor.pauseUntilReady();
+    control.runInParallel(() => {
+      while (true){
+        if (Math.abs(this.driveMotor.angle()) >= a) break;
+      }
+      this.steer(this.steeringSpeed);
+      while (true) {
+        if (Math.abs(this.driveMotor.angle()) >= a + b) break;
+      }
+      this.resetSteer(this.steeringSpeed);
+    }); 
+    this.driveMotor.run((forwards ? 1 : -1) * 50, a + b + c, MoveUnit.Degrees);
   }
 
   public resetDrive(){
@@ -59,21 +64,14 @@ class Rover {
     return this.driveMotor.angle()
   }
 
-  public steer(radius: number, speed: number){
-    let degrees : number[] = MathUtils.solveQuadratic(Math.abs(radius), config.steer.a, config.steer.b, config.steer.c);
-    degrees = degrees.filter(value => value < config.steer.maxMotorAngle);
-    if (degrees.length > 0){
-      const amount = degrees[0] * (radius < 0 ? -1 : 1);
-
-      this.steerMotor.pauseUntilReady();
-      this.steerMotor.run(speed, amount - this.steerMotor.angle(), MoveUnit.Degrees);
-
-    }else console.log("Received Invalid steer Radius");
+  public steer(speed: number){
+    this.steerMotor.pauseUntilReady();
+    this.steerMotor.run(speed, this.steeringDegrees, MoveUnit.Degrees);
   }
 
   public resetSteer(speed: number){
     this.steerMotor.pauseUntilReady();
-    this.steerMotor.run(speed, -this.steerMotor.angle(), MoveUnit.Degrees);
+    this.steerMotor.run(speed, -this.steeringDegrees, MoveUnit.Degrees);
   }
 
   public lowerCage(){
@@ -98,6 +96,7 @@ class Rover {
   }
 
   public getOrientation() : number {
+    console.log("" + this.orientationSensor.angle());
     return this.orientationSensor.angle() - this.lastDegree;
   }
 
@@ -107,5 +106,13 @@ class Rover {
 
   public getColor() : ColorSensorColor {
     return this.colorSensor.color();
+  }
+
+  public runSteer(amount : number) {
+    this.steerMotor.run(5, amount, MoveUnit.Degrees);
+  }
+
+  public calibrateSteer(){
+    this.steerMotor.reset();
   }
 }
