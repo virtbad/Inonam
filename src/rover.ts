@@ -12,6 +12,7 @@ class Rover {
 
   private steeringSpeed : number;
   private steeringDegrees : number;
+  private calibrationLength : number;
   
   constructor() {
     this.driveMotor = motors.largeA;
@@ -24,6 +25,7 @@ class Rover {
     this.lastDegree = 0;
     this.steeringSpeed = 5;
     this.steeringDegrees = 75;
+    this.calibrationLength = 45;
   }
 
   public drive(value: number, speed: number){
@@ -112,7 +114,12 @@ class Rover {
     this.steerMotor.run(5, amount, MoveUnit.Degrees);
   }
 
-  public calibrateSteer(){
+  public calibrateSteerDone(){
     this.steerMotor.reset();
+  }
+
+  public calibrateSteerMove(forwards : boolean){
+    this.steerMotor.run(this.steeringSpeed, this.steeringDegrees, MoveUnit.Degrees);
+    this.steerMotor.run(this.steeringSpeed, -this.steeringDegrees + (forwards ? 1 : -1), MoveUnit.Degrees);
   }
 }

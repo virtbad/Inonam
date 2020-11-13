@@ -2,10 +2,17 @@ class UI {
     private uiMode : number;
 
     private steerTestMode : number;
-    private steerTestA : number;
-    private steerTestB : number;
-    private steerTestC : number;
     private steerTestDelta : number;
+
+    private steerTestForwardsA : number;
+    private steerTestForwardsB : number;
+    private steerTestForwardsC : number;
+
+    private steerTestBackwardsA : number;
+    private steerTestBackwardsB : number;
+    private steerTestBackwardsC : number;
+
+    private currentCalibratedBalance : number;
 
     private rover : Rover;
 
@@ -13,10 +20,17 @@ class UI {
         this.uiMode = 0;
 
         this.steerTestMode = 0;
-        this.steerTestA = 500;
-        this.steerTestB = 2000;
-        this.steerTestC = 500;
-        this.steerTestDelta = 100;
+        this.steerTestDelta = 50;
+
+        this.steerTestForwardsA = 500;
+        this.steerTestForwardsB = 3300;
+        this.steerTestForwardsC = 800;
+
+        this.steerTestBackwardsA = 100;
+        this.steerTestBackwardsB = 3500;
+        this.steerTestBackwardsC = 1000;
+
+        this.currentCalibratedBalance = -9999;
 
         this.rover = rover;
 
@@ -32,10 +46,14 @@ class UI {
     private left(){
         switch (this.uiMode) {
             case 0:
-                this.rover.runSteer(1);
+                this.rover.calibrateSteerMove(true);
+                if (this.currentCalibratedBalance == -9999) this.currentCalibratedBalance = 0;
+                this.currentCalibratedBalance++;
+                this.updateInterface();
                 break;
             case 1:
-                this.steeringTest(true);
+            case 2:
+                this.steerTestSwitchMode();
                 break;
         }
     }
@@ -43,10 +61,14 @@ class UI {
     private right(){
         switch (this.uiMode) {
             case 0:
-                this.rover.runSteer(-1);
+                this.rover.calibrateSteerMove(false);
+                if (this.currentCalibratedBalance == -9999) this.currentCalibratedBalance = 0;
+                this.currentCalibratedBalance--;
+                this.updateInterface();
                 break;
+            case 2:
             case 1:
-                this.steeringTest(false);
+                this.steerTestSwitchMode();
                 break;
         }
     }
@@ -56,7 +78,13 @@ class UI {
             case 0:
                 break;
             case 1:
-                this.steerTestChange(true);
+                this.steerTestChange(true, true);
+                break;
+            case 2:
+                this.steerTestChange(true, false);
+                break;
+            case 3:
+                this.collectingTest();
                 break;
         }
     }
@@ -66,7 +94,13 @@ class UI {
             case 0:
                 break;
             case 1:
-                this.steerTestChange(false);
+                this.steerTestChange(false, true);
+                break;
+            case 2:
+                this.steerTestChange(false, false);
+                break;
+            case 3:
+                this.curvingTest();
                 break;
         }
     }
@@ -74,12 +108,22 @@ class UI {
     private center(){
         switch (this.uiMode) {
             case 0:
-                this.rover.calibrateSteer();
+                if (this.currentCalibratedBalance != -9999) this.rover.calibrateSteerDone();
                 this.uiMode = 1;
                 this.updateInterface();
                 break;
             case 1:
-                this.steerTestSwitchMode();
+                this.uiMode = 2;
+                this.updateInterface();
+                break;
+            case 2:
+                this.uiMode = 3;
+                this.updateInterface(); 
+                break;
+            case 3:
+                this.currentCalibratedBalance = -9999;
+                this.uiMode = 0;
+                this.updateInterface();
                 break;
         }
     }
@@ -89,12 +133,24 @@ class UI {
 
         switch (this.uiMode) {
             case 0:
-                brick.showString("Please set steering", 1);
+                brick.showString("Steering Calibration", 1);
+                brick.showString((this.currentCalibratedBalance != -9999 ? "Calibration: " + this.currentCalibratedBalance : "Not yet Changed"), 2);
                 break;
             case 1:
-                brick.showString((this.steerTestMode == 0 ? "- " : "") + "First: " + this.steerTestA, 1);
-                brick.showString((this.steerTestMode == 1 ? "- " : "") + "Main: " + this.steerTestB, 2);
-                brick.showString((this.steerTestMode == 2 ? "- " : "") + "Last: " + this.steerTestC, 3);
+                brick.showString("Test Forwards", 1);
+                brick.showString((this.steerTestMode == 0 ? "- " : "") + "First: " + this.steerTestForwardsA, 2);
+                brick.showString((this.steerTestMode == 1 ? "- " : "") + "Main: " + this.steerTestForwardsB, 3);
+                brick.showString((this.steerTestMode == 2 ? "- " : "") + "Last: " + this.steerTestForwardsC, 4);
+                break;
+            case 2:
+                brick.showString("Test Backwards", 1);
+                brick.showString((this.steerTestMode == 0 ? "- " : "") + "First: " + this.steerTestBackwardsA, 2);
+                brick.showString((this.steerTestMode == 1 ? "- " : "") + "Main: " + this.steerTestBackwardsB, 3);
+                brick.showString((this.steerTestMode == 2 ? "- " : "") + "Last: " + this.steerTestBackwardsC, 4);
+                break;
+            case 3:
+                brick.showString("Up: Collecting", 1);
+                brick.showString("Down: Curving", 2);
                 break;
         }
     }
@@ -108,21 +164,58 @@ class UI {
         this.updateInterface();
     }
     
-    private steerTestChange(increase : boolean){
+    private steerTestChange(increase : boolean, forwards : boolean){
+
+        let a : number;
+        let b : number;
+        let c : number;
+
+        if (forwards){
+            a = this.steerTestForwardsA; 
+            b = this.steerTestForwardsB; 
+            c = this.steerTestForwardsC; 
+        }else {
+            a = this.steerTestBackwardsA; 
+            b = this.steerTestBackwardsB; 
+            c = this.steerTestBackwardsC; 
+        }
+
         switch(this.steerTestMode){
-            case 0: this.steerTestA += (increase ? this.steerTestDelta : -this.steerTestDelta); break;
-            case 1: this.steerTestB += (increase ? this.steerTestDelta : -this.steerTestDelta); break;
-            case 2: this.steerTestC += (increase ? this.steerTestDelta : -this.steerTestDelta); break;
+            case 0: a += (increase ? this.steerTestDelta : -this.steerTestDelta); break;
+            case 1: b += (increase ? this.steerTestDelta : -this.steerTestDelta); break;
+            case 2: c += (increase ? this.steerTestDelta : -this.steerTestDelta); break;
         }
     
-        if (this.steerTestA < 0) this.steerTestA = 0;
-        if (this.steerTestB < 0) this.steerTestB = 0;
-        if (this.steerTestC < 0) this.steerTestC = 0;
+        if (a < 0) a = 0;
+        if (b < 0) b = 0;
+        if (c < 0) c = 0;
+
+        if(forwards){
+            this.steerTestForwardsA = a;
+            this.steerTestForwardsB = b;
+            this.steerTestForwardsC = c;
+        }else {
+            this.steerTestBackwardsA = a;
+            this.steerTestBackwardsB = b;
+            this.steerTestBackwardsC = c;
+        }
     
         this.updateInterface();
     }
     
-    private steeringTest(forwards : boolean){
-        this.rover.driveSteer(this.steerTestA, this.steerTestB, this.steerTestC, forwards);
+    private collectingTest(){
+        this.rover.driveSteer(this.steerTestBackwardsA, this.steerTestBackwardsB, this.steerTestBackwardsC, false);
+        pause(1000);
+        this.rover.drive(100, 50);
+        pause(2000);
+        this.rover.drive(-100, 50);
+        pause(1000);
+        this.rover.driveSteer(this.steerTestForwardsA, this.steerTestForwardsB, this.steerTestForwardsC, true);
+    }
+
+    private curvingTest(){
+        this.rover.driveSteer(this.steerTestForwardsA, this.steerTestForwardsB, this.steerTestForwardsC, true);
+        pause(2000);
+        this.rover.driveSteer(this.steerTestBackwardsA, this.steerTestBackwardsB, this.steerTestBackwardsC, false);
     }
 }
