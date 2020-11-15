@@ -8,11 +8,16 @@ class Rover {
   private orientationSensor : sensors.GyroSensor;
   private colorSensor : sensors.ColorSensor;
 
-  private lastDegree : number;
-
   private steeringSpeed : number;
   private steeringDegrees : number;
   private calibrationLength : number;
+
+  private static cmPerDegree : number = 0.034865;
+
+  private static cageDownDegrees : number = 0;
+  private static cageUpDegrees : number = 290;
+  private static cageMidDegrees : number = 100;
+  private static cageHoverDegrees : number = 140;
   
   constructor() {
     this.driveMotor = motors.largeA;
@@ -22,15 +27,27 @@ class Rover {
     this.orientationSensor = sensors.gyro4;
     this.colorSensor = sensors.color2;
 
-    this.lastDegree = 0;
+    this.colorSensor.setMode(ColorSensorMode.Color);
+
     this.steeringSpeed = 5;
     this.steeringDegrees = 75;
     this.calibrationLength = 45;
   }
 
-  public drive(value: number, speed: number){
-    const eff: number = value / config.fieldsPerDeg;
-    this.driveMotor.run(speed, eff, MoveUnit.Degrees);
+  public static cmToDegrees(cm : number) : number {
+    return cm / Rover.cmPerDegree;
+  }
+
+  public static degreesToCm(degrees : number) : number {
+    return degrees * this.cmPerDegree;
+  }
+
+  public driveByCM(value: number, speed: number){
+    this.driveByDegrees(Rover.cmToDegrees(value), speed);
+  }
+
+  public driveByDegrees(value: number, speed : number){
+    this.driveMotor.run(speed, value, MoveUnit.Degrees);
   }
 
   public driveSteer(a : number, b : number, c : number, forwards : boolean){
@@ -53,9 +70,9 @@ class Rover {
     this.driveMotor.reset();
   }
 
-  public go(speed: number){
-    this.driveMotor.pauseUntilReady();
+  public goAccelerated(speed: number){
     this.driveMotor.run(speed);
+    //control.runInParallel(() => this.driveMotor.ramp(speed, 1000000000, MoveUnit.Rotations, 0.5)); // COMPROMISE TO HAVE SMOOTH ACCELERATION
   }
 
   public stop(){
@@ -76,34 +93,29 @@ class Rover {
     this.steerMotor.run(speed, -this.steeringDegrees, MoveUnit.Degrees);
   }
 
-  public lowerCage(){
-    this.setCage(0);
+  public cageDown(){
+    this.cageSet(Rover.cageDownDegrees);
   }
-
-  public liftCage(){
-    this.setCage(275);
+  public cageMid(){
+    this.cageSet(Rover.cageMidDegrees);
   }
-
-  public hoverCage(){
-    this.setCage(30);
+  public cageUp(){
+    this.cageSet(Rover.cageUpDegrees);
   }
-
-  private setCage(degrees: number){
+  public cageHover(){
+    this.cageSet(Rover.cageHoverDegrees);
+  }
+  private cageSet(degrees: number){
     this.cageMotor.pauseUntilReady();
     this.cageMotor.run(10, degrees - this.cageMotor.angle(), MoveUnit.Degrees)
   }
 
-  public getNextObject() : number{
+  public getDistance() : number{
     return this.distanceSensor.distance();
   }
 
   public getOrientation() : number {
-    console.log("" + this.orientationSensor.angle());
-    return this.orientationSensor.angle() - this.lastDegree;
-  }
-
-  public resetOrientation() {
-    return this.lastDegree = this.orientationSensor.angle();
+    return this.orientationSensor.angle();
   }
 
   public getColor() : ColorSensorColor {

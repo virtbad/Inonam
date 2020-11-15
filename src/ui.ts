@@ -16,23 +16,18 @@ class UI {
 
     private rover : Rover;
 
-    constructor(rover : Rover){
-        this.uiMode = 0;
+    private driver : Driver;
+
+    constructor(rover : Rover, driver : Driver){
+        this.uiMode = 3;
 
         this.steerTestMode = 0;
-        this.steerTestDelta = 50;
-
-        this.steerTestForwardsA = 500;
-        this.steerTestForwardsB = 3300;
-        this.steerTestForwardsC = 800;
-
-        this.steerTestBackwardsA = 100;
-        this.steerTestBackwardsB = 3500;
-        this.steerTestBackwardsC = 1000;
+        this.steerTestDelta = 25;
 
         this.currentCalibratedBalance = -9999;
 
         this.rover = rover;
+        this.driver = driver;
 
         brick.buttonDown.onEvent(ButtonEvent.Pressed, () => this.down());
         brick.buttonUp.onEvent(ButtonEvent.Pressed, () => this.up());
@@ -55,6 +50,10 @@ class UI {
             case 2:
                 this.steerTestSwitchMode();
                 break;
+            case 3:
+                this.rover.cageUp();
+                this.driver.calibratoinSequence();
+                break;
         }
     }
 
@@ -70,6 +69,9 @@ class UI {
             case 1:
                 this.steerTestSwitchMode();
                 break;
+            case 3:
+                rover.cageDown();
+                break;
         }
     }
 
@@ -84,7 +86,8 @@ class UI {
                 this.steerTestChange(true, false);
                 break;
             case 3:
-                this.collectingTest();
+                this.rover.cageUp();
+                this.driver.getToNextObject();
                 break;
         }
     }
@@ -100,7 +103,8 @@ class UI {
                 this.steerTestChange(false, false);
                 break;
             case 3:
-                this.curvingTest();
+                this.rover.cageUp();
+                this.driver.testSequence();
                 break;
         }
     }
@@ -138,15 +142,15 @@ class UI {
                 break;
             case 1:
                 brick.showString("Test Forwards", 1);
-                brick.showString((this.steerTestMode == 0 ? "- " : "") + "First: " + this.steerTestForwardsA, 2);
-                brick.showString((this.steerTestMode == 1 ? "- " : "") + "Main: " + this.steerTestForwardsB, 3);
-                brick.showString((this.steerTestMode == 2 ? "- " : "") + "Last: " + this.steerTestForwardsC, 4);
+                brick.showString((this.steerTestMode == 0 ? "- " : "") + "First: " + driver.forwardsA, 2);
+                brick.showString((this.steerTestMode == 1 ? "- " : "") + "Main: " + driver.forwardsB, 3);
+                brick.showString((this.steerTestMode == 2 ? "- " : "") + "Last: " + driver.forwardsC, 4);
                 break;
             case 2:
                 brick.showString("Test Backwards", 1);
-                brick.showString((this.steerTestMode == 0 ? "- " : "") + "First: " + this.steerTestBackwardsA, 2);
-                brick.showString((this.steerTestMode == 1 ? "- " : "") + "Main: " + this.steerTestBackwardsB, 3);
-                brick.showString((this.steerTestMode == 2 ? "- " : "") + "Last: " + this.steerTestBackwardsC, 4);
+                brick.showString((this.steerTestMode == 0 ? "- " : "") + "First: " + driver.backwardsA, 2);
+                brick.showString((this.steerTestMode == 1 ? "- " : "") + "Main: " + driver.backwardsB, 3);
+                brick.showString((this.steerTestMode == 2 ? "- " : "") + "Last: " + driver.backwardsC, 4);
                 break;
             case 3:
                 brick.showString("Up: Collecting", 1);
@@ -171,13 +175,13 @@ class UI {
         let c : number;
 
         if (forwards){
-            a = this.steerTestForwardsA; 
-            b = this.steerTestForwardsB; 
-            c = this.steerTestForwardsC; 
+            a = driver.forwardsA; 
+            b = driver.forwardsB; 
+            c = driver.forwardsC; 
         }else {
-            a = this.steerTestBackwardsA; 
-            b = this.steerTestBackwardsB; 
-            c = this.steerTestBackwardsC; 
+            a = driver.backwardsA; 
+            b = driver.backwardsB; 
+            c = driver.backwardsC; 
         }
 
         switch(this.steerTestMode){
@@ -191,31 +195,15 @@ class UI {
         if (c < 0) c = 0;
 
         if(forwards){
-            this.steerTestForwardsA = a;
-            this.steerTestForwardsB = b;
-            this.steerTestForwardsC = c;
+            driver.forwardsA = a;
+            driver.forwardsB = b;
+            driver.forwardsC = c;
         }else {
-            this.steerTestBackwardsA = a;
-            this.steerTestBackwardsB = b;
-            this.steerTestBackwardsC = c;
+            driver.backwardsA = a;
+            driver.backwardsB = b;
+            driver.backwardsC = c;
         }
     
         this.updateInterface();
-    }
-    
-    private collectingTest(){
-        this.rover.driveSteer(this.steerTestBackwardsA, this.steerTestBackwardsB, this.steerTestBackwardsC, false);
-        pause(1000);
-        this.rover.drive(100, 50);
-        pause(2000);
-        this.rover.drive(-100, 50);
-        pause(1000);
-        this.rover.driveSteer(this.steerTestForwardsA, this.steerTestForwardsB, this.steerTestForwardsC, true);
-    }
-
-    private curvingTest(){
-        this.rover.driveSteer(this.steerTestForwardsA, this.steerTestForwardsB, this.steerTestForwardsC, true);
-        pause(2000);
-        this.rover.driveSteer(this.steerTestBackwardsA, this.steerTestBackwardsB, this.steerTestBackwardsC, false);
     }
 }
